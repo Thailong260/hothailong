@@ -19,7 +19,7 @@
             margin: 0;
             background-color: #6200ea;
         }
-        #codeContainer, #container {
+        #codeContainer, #container, #templateGenerator {
             max-width: 800px;
             margin: 30px auto;
             padding: 20px;
@@ -41,7 +41,7 @@
             color: #555;
             font-weight: bold;
         }
-        input[type="text"], textarea {
+        input[type="text"], input[type="number"], textarea {
             width: calc(100% - 22px);
             padding: 10px;
             margin-bottom: 10px;
@@ -96,6 +96,19 @@
         }
         .copy-button:hover {
             background-color: #1e88e5;
+        }
+        #templateCount {
+            width: 100px;
+            margin-right: 10px;
+        }
+        #templateOutput {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        #templateOutput pre {
+            white-space: pre-wrap;
+            word-break: break-all;
         }
         @media (max-width: 600px) {
             input[type="text"], textarea {
@@ -307,7 +320,6 @@
             container.appendChild(codeSection);
         }
 
-        // Hàm xử lý nhập dữ liệu cho phần IDA 2
         function processTextInputIDA2(container) {
             const frameworkPath = "Frameworks/UnityFramework.framework/UnityFramework";
             const textareas = container.getElementsByTagName('textarea');
@@ -358,7 +370,7 @@ function ActiveCodePatch(fpath, vaddr, bytes) {
 }
 
 function DeactiveCodePatch(fpath, vaddr, bytes) {
-    return h5frida.DeactiveCodePatch(fpath, vaddr, bytes);
+	return h5frida.DeactiveCodePatch(fpath, vaddr, bytes);
 }
 `;
 
@@ -370,7 +382,6 @@ function DeactiveCodePatch(fpath, vaddr, bytes) {
                 }
             }
 
-            
             activeCode += '\n\n';
 
             for (let { offsetInput, byteInput } of patches) {
@@ -400,6 +411,76 @@ function DeactiveCodePatch(fpath, vaddr, bytes) {
                 const blocks = text.split(/(?=Modify detected)/).reverse();
                 textarea.value = blocks.join('');
             });
+        }
+
+        function generateRandomHex(length) {
+            return [...Array(length)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+        }
+
+        function generateTemplates() {
+            const count = document.getElementById('templateCount').value;
+            const outputDiv = document.getElementById('templateOutput');
+            outputDiv.innerHTML = '';
+
+            let allCode = '';
+
+            for (let i = 0; i < count; i++) {
+                const randomOffset = '0x' + generateRandomHex(8);
+                const randomByte = generateRandomHex(8).toUpperCase();
+
+                const activeCode = `ActiveCodePatch("Frameworks/UnityFramework.framework/UnityFramework", ${randomOffset}, "${randomByte}");`;
+                const deactiveCode = `DeactiveCodePatch("Frameworks/UnityFramework.framework/UnityFramework", ${randomOffset}, "${randomByte}");`;
+
+                allCode += activeCode + '\n';
+                allCode += deactiveCode + '\n\n';
+            }
+
+            const codeElement = document.createElement('pre');
+            codeElement.className = 'code-passages';
+            codeElement.textContent = allCode;
+            outputDiv.appendChild(codeElement);
+
+            const copyButton = document.createElement('button');
+            copyButton.textContent = 'Sao chép tất cả';
+            copyButton.onclick = function() {
+                navigator.clipboard.writeText(allCode).then(() => {
+                    alert('Đã sao chép tất cả mã!');
+                });
+            };
+            outputDiv.appendChild(copyButton);
+        }
+
+        function generateEncryptedTemplates() {
+            const count = document.getElementById('templateCount').value;
+            const outputDiv = document.getElementById('templateOutput');
+            outputDiv.innerHTML = '';
+
+            let allCode = '';
+
+            for (let i = 0; i < count; i++) {
+                const randomOffset = '0x' + generateRandomHex(8);
+                const randomByte = generateRandomHex(8).toUpperCase();
+
+                const activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/UnityFramework") UTF8String], ENCRYPTOFFSET("${randomOffset}"), (char*)[NSSENCRYPT("${randomByte}") UTF8String]);`;
+                const deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/UnityFramework") UTF8String], ENCRYPTOFFSET("${randomOffset}"), (char*)[NSSENCRYPT("${randomByte}") UTF8String]);`;
+
+                allCode += activeCode + '\n';
+                allCode += deactiveCode + '\n\n';
+            }
+
+            const codeElement = document.createElement('pre');
+            codeElement.className = 'code-passages';
+            codeElement.textContent = allCode;
+            outputDiv.appendChild(codeElement);
+
+            const copyButton = document.createElement('button');
+            copyButton.textContent = 'Sao chép tất cả';
+            copyButton.onclick = function() {
+                navigator.clipboard.writeText(allCode).then(() => {
+                    alert('Đã sao chép tất cả mã!');
+                });
+            };
+            outputDiv.appendChild(copyButton);
         }
 
         window.onload = function() {
@@ -511,5 +592,13 @@ function DeactiveCodePatch(fpath, vaddr, bytes) {
     <div id="codeContainer"></div>
     <button onclick="addCodeSection()">Thêm Offset Khác</button>
     <button onclick="copyAllContents(document.getElementById('codeContainer'))">Sao Chép Tất Cả</button>
+    
+    <div id="templateGenerator" class="input-section">
+        <h2>Tạo Nhiều Biểu Mẫu</h2>
+        <input type="number" id="templateCount" value="200" min="1" max="1000">
+        <button onclick="generateTemplates()">Tạo Biểu Mẫu</button>
+        <button onclick="generateEncryptedTemplates()">Tạo Biểu Mẫu Mã Hóa</button>
+        <div id="templateOutput"></div>
+    </div>
 </body>
 </html>
