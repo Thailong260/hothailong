@@ -374,21 +374,13 @@ function DeactiveCodePatch(fpath, vaddr, bytes) {
 }
 `;
 
+
             for (let { offsetInput, byteInput } of patches) {
                 const offset = offsetInput.value;
                 const byte = byteInput.value;
                 if (offset && byte) {
                     activeCode += `ActiveCodePatch("${frameworkPath}", ${offset}, "${byte}");\n`;
-                }
-            }
-
-            activeCode += '\n\n';
-
-            for (let { offsetInput, byteInput } of patches) {
-                const offset = offsetInput.value;
-                const byte = byteInput.value;
-                if (offset && byte) {
-                    activeCode += `DeactiveCodePatch("${frameworkPath}", ${offset}, "${byte}");\n`;
+                    activeCode += `DeactiveCodePatch("${frameworkPath}", ${offset}, "${byte}");\n\n`;
                 }
             }
 
@@ -417,22 +409,33 @@ function DeactiveCodePatch(fpath, vaddr, bytes) {
             return [...Array(length)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
         }
 
-        function generateTemplates() {
+        function generateNearbyTemplates() {
             const count = document.getElementById('templateCount').value;
+            const sampleActivePatchInput = document.getElementById('sampleActivePatch').value;
             const outputDiv = document.getElementById('templateOutput');
             outputDiv.innerHTML = '';
+
+            const regex = /ActiveCodePatch\("([^"]+)",\s*(0x[0-9a-fA-F]+),\s*"([0-9A-F]+)"\)/;
+            const match = sampleActivePatchInput.match(regex);
+
+            if (!match) {
+                alert('Định dạng mẫu ActiveCodePatch không hợp lệ.');
+                return;
+            }
+
+            const [, frameworkPath, offsetHex, byte] = match;
+            let baseOffset = parseInt(offsetHex, 16);
 
             let allCode = '';
 
             for (let i = 0; i < count; i++) {
-                const randomOffset = '0x' + generateRandomHex(8);
-                const randomByte = generateRandomHex(8).toUpperCase();
+                // Tạo offset ngẫu nhiên trong khoảng ±100 byte
+                const randomOffset = baseOffset + Math.floor(Math.random() * 201) - 100;
+                const randomOffsetHex = '0x' + randomOffset.toString(16).padStart(8, '0');
 
-                const activeCode = `ActiveCodePatch("Frameworks/UnityFramework.framework/UnityFramework", ${randomOffset}, "${randomByte}");`;
-                const deactiveCode = `DeactiveCodePatch("Frameworks/UnityFramework.framework/UnityFramework", ${randomOffset}, "${randomByte}");`;
-
-                allCode += activeCode + '\n';
-                allCode += deactiveCode + '\n\n';
+                const activeCode = `ActiveCodePatch("${frameworkPath}", ${randomOffsetHex}, "${byte}");`;
+                const deactiveCode = `DeactiveCodePatch("${frameworkPath}", ${randomOffsetHex}, "${byte}");`;
+                allCode += activeCode + '\n' + deactiveCode + '\n\n';
             }
 
             const codeElement = document.createElement('pre');
@@ -452,20 +455,30 @@ function DeactiveCodePatch(fpath, vaddr, bytes) {
 
         function generateEncryptedTemplates() {
             const count = document.getElementById('templateCount').value;
+            const sampleActivePatchInput = document.getElementById('sampleActivePatch').value;
             const outputDiv = document.getElementById('templateOutput');
             outputDiv.innerHTML = '';
+
+            const regex = /ActiveCodePatch\("([^"]+)",\s*(0x[0-9a-fA-F]+),\s*"([0-9A-F]+)"\)/;
+            const match = sampleActivePatchInput.match(regex);
+
+            if (!match) {
+                alert('Định dạng mẫu ActiveCodePatch không hợp lệ.');
+                return;
+            }
+
+            const [, frameworkPath, , byte] = match;
 
             let allCode = '';
 
             for (let i = 0; i < count; i++) {
                 const randomOffset = '0x' + generateRandomHex(8);
-                const randomByte = generateRandomHex(8).toUpperCase();
+                const randomByte = generateRandomHex(byte.length).toUpperCase();
 
-                const activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/UnityFramework") UTF8String], ENCRYPTOFFSET("${randomOffset}"), (char*)[NSSENCRYPT("${randomByte}") UTF8String]);`;
-                const deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/UnityFramework") UTF8String], ENCRYPTOFFSET("${randomOffset}"), (char*)[NSSENCRYPT("${randomByte}") UTF8String]);`;
+                const activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("${frameworkPath}") UTF8String], ENCRYPTOFFSET("${randomOffset}"), (char*)[NSSENCRYPT("${randomByte}") UTF8String]);`;
+                const deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("${frameworkPath}") UTF8String], ENCRYPTOFFSET("${randomOffset}"), (char*)[NSSENCRYPT("${randomByte}") UTF8String]);`;
 
-                allCode += activeCode + '\n';
-                allCode += deactiveCode + '\n\n';
+                allCode += activeCode + '\n' + deactiveCode + '\n\n';
             }
 
             const codeElement = document.createElement('pre');
@@ -584,6 +597,24 @@ function DeactiveCodePatch(fpath, vaddr, bytes) {
                 copyToClipboard();
             };
             newContainer.appendChild(copyToClipboardButton);
+
+            // Template Generator
+            const templateGenerator = document.getElementById('templateGenerator');
+            
+            const sampleActivePatchLabel = document.createElement('label');
+            sampleActivePatchLabel.innerText = 'Nhập mẫu ActiveCodePatch:';
+            templateGenerator.insertBefore(sampleActivePatchLabel, templateGenerator.children[2]);
+
+            const sampleActivePatchInput = document.createElement('input');
+            sampleActivePatchInput.type = 'text';
+            sampleActivePatchInput.id = 'sampleActivePatch';
+            sampleActivePatchInput.placeholder = 'Ví dụ: ActiveCodePatch("Frameworks/UnityFramework.framework/UnityFramework", 0xdd639e32, "3BABE621")';
+            templateGenerator.insertBefore(sampleActivePatchInput, templateGenerator.children[3]);
+
+            const generateNearbyButton = document.createElement('button');
+            generateNearbyButton.innerText = 'Tạo Biểu Mẫu Gần offset Và Byte';
+            generateNearbyButton.onclick = generateNearbyTemplates;
+            templateGenerator.insertBefore(generateNearbyButton, templateGenerator.lastElementChild);
         };
     </script>
 </head>
