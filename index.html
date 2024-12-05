@@ -4,88 +4,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GHOST - DVC IPA</title>
+    <title>GHOST - DVC IPA Christmas Edition</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
+            font-family: 'Poppins', sans-serif;
+            background-color: #0a0e29;
+            color: #e8f1f2;
             margin: 0;
             padding: 0;
+            background-image: 
+                url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.2)"/></svg>'),
+                radial-gradient(circle, #1a237e 0%, #0a0e29 100%);
+            background-attachment: fixed;
+            background-size: 100px 100px, cover;
         }
-        h1 {
-            color: #fff;
+
+        h1, h2 {
+            color: #ffd700;
             text-align: center;
             padding: 20px 0;
             margin: 0;
-            background-color: #6200ea;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
+
         #codeContainer, #container, #templateGenerator {
             max-width: 800px;
             margin: 30px auto;
             padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
         }
+
         .input-section, .code-section {
             margin-bottom: 20px;
             padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05);
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
+
         label {
             display: block;
             margin-bottom: 5px;
-            color: #555;
-            font-weight: bold;
+            color: #ffd700;
+            font-weight: 600;
         }
+
         input[type="text"], input[type="number"], textarea {
             width: calc(100% - 22px);
             padding: 10px;
             margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #e8f1f2;
             font-size: 14px;
         }
+
         textarea {
             height: 100px;
+            resize: vertical;
         }
+
         button {
-            background-color: #6200ea;
+            background-color: #c41e3a;
             color: white;
             padding: 10px 20px;
             margin: 5px 0;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            display: inline-block;
+            transition: background-color 0.3s ease, transform 0.1s ease;
             font-size: 14px;
+            font-weight: 600;
         }
+
         button:hover {
-            background-color: #3700b3;
+            background-color: #e63946;
+            transform: translateY(-2px);
         }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
         .code-passages {
-            background-color: #e3f2fd;
+            background-color: rgba(10, 35, 66, 0.8);
             padding: 15px;
-            margin-bottom: 5px;
-            border-left: 3px solid #42a5f5;
-            border-radius: 4px;
+            margin-bottom: 10px;
+            border-left: 3px solid #ffd700;
+            border-radius: 5px;
             overflow-x: auto;
             font-family: 'Courier New', monospace;
             font-size: 12px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            color: #e8f1f2;
         }
-        .code-block-container {
-            margin-bottom: 20px;
-        }
+
         .copy-button {
             display: block;
             margin: 5px auto;
-            background-color: #42a5f5;
+            background-color: #4caf50;
             color: white;
             padding: 5px 10px;
             border: none;
@@ -94,22 +116,49 @@
             font-size: 12px;
             transition: background-color 0.3s ease;
         }
+
         .copy-button:hover {
-            background-color: #1e88e5;
+            background-color: #45a049;
         }
+
         #templateCount {
             width: 100px;
             margin-right: 10px;
         }
+
         #templateOutput {
             margin-top: 20px;
             max-height: 400px;
             overflow-y: auto;
         }
+
         #templateOutput pre {
             white-space: pre-wrap;
             word-break: break-all;
         }
+
+        .snowflake {
+            color: #fff;
+            font-size: 1em;
+            font-family: Arial, sans-serif;
+            text-shadow: 0 0 5px #000;
+            position: fixed;
+            top: -10%;
+            z-index: 9999;
+            user-select: none;
+            cursor: default;
+            animation: snowfall 10s linear infinite;
+        }
+
+        @keyframes snowfall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+
         @media (max-width: 600px) {
             input[type="text"], textarea {
                 width: calc(100% - 16px);
@@ -120,244 +169,330 @@
             }
         }
     </style>
-    <script>
-        let sectionCount = 0;
-        let patches = [];
+</head>
+<body>
+    <h1>🎄 GHOST - DVC IPA Christmas Edition 🎅</h1>
+    <div id="codeContainer"></div>
+    <button onclick="addCodeSection()">Thêm Offset Khác 🎁</button>
+    <button onclick="copyAllContents(document.getElementById('codeContainer'))">Sao Chép Tất Cả 📋</button>
+    
+    <div id="templateGenerator" class="input-section">
+        <h2>🎄 Tạo Nhiều Biểu Mẫu 🎄</h2>
+        <input type="number" id="templateCount" value="200" min="1" max="1000">
+        <input type="text" id="sampleActivePatch" placeholder="Ví dụ: ActiveCodePatch(&quot;Frameworks/UnityFramework.framework/UnityFramework&quot;, 0xdd639e32, &quot;3BABE621&quot;)">
+        <button onclick="generateEncryptedTemplates()">Tạo Biểu Mẫu Mã Hóa 🔒</button>
+        <button onclick="generateTemplates()">Tạo Biểu Mẫu Không Mã Hóa 🔓</button>
+        <button onclick="generateNearbyTemplates()">Tạo Biểu Mẫu Gần offset Và Byte 🎯</button>
+        <div id="templateOutput"></div>
+    </div>
 
-        function processTextInput(inputElement, container) {
-            const text = inputElement.value;
+    
+<script>
+    let sectionCount = 0;
+    let patches = [];
+
+    function processTextInput(inputElement, container) {
+        const text = inputElement.value;
+        const regex = /Modify detected at: .+ \(IDA: (.+?)\)([\s\S]*?)(?=Modify detected|$)/g;
+        const allMatches = [...text.matchAll(regex)].reverse();
+        const modRegex = /Org:\s*0x[\da-fA-F]+,\s*Mod:\s*0x([\da-fA-F]+)/g;
+        const uniquePairs = new Map();
+
+        allMatches.forEach(match => {
+            const idaOffset = match[1];
+            const modificationsBlock = match[2];
+            let modValue;
+            let byteSequence = '';
+
+            while ((modValue = modRegex.exec(modificationsBlock)) !== null) {
+                byteSequence += modValue[1].padStart(2, '0').toUpperCase();
+            }
+
+            if (!uniquePairs.has(idaOffset)) {
+                uniquePairs.set(idaOffset, byteSequence);
+            }
+        });
+
+        container.innerHTML = '';
+        uniquePairs.forEach((byteSequence, ida) => {
+            const offsetString = `"${ida}"`;
+
+            const activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/UnityFramework") UTF8String], ENCRYPTOFFSET(${offsetString}), (char*)[NSSENCRYPT("${byteSequence}") UTF8String]);`;
+            const deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/UnityFramework") UTF8String], ENCRYPTOFFSET(${offsetString}), (char*)[NSSENCRYPT("${byteSequence}") UTF8String]);`;
+
+            const activeDiv = createCodeDiv(activeCode);
+            const deactiveDiv = createCodeDiv(deactiveCode);
+
+            container.appendChild(activeDiv);
+            container.appendChild(deactiveDiv);
+        });
+    }
+
+    function createCodeDiv(code) {
+        const codeDiv = document.createElement("div");
+        codeDiv.className = "code-block-container";
+
+        const codeContent = document.createElement("div");
+        codeContent.className = "code-passages";
+        codeContent.innerText = code;
+
+        const copyButton = document.createElement("button");
+        copyButton.className = "copy-button";
+        copyButton.innerText = "Sao chép";
+        copyButton.onclick = function() {
+            navigator.clipboard.writeText(code).then(() => {
+                alert("Kết quả đã được sao chép!");
+            }).catch(err => {
+                console.error("Error copying text: ", err);
+            });
+        };
+
+        codeDiv.appendChild(codeContent);
+        codeDiv.appendChild(copyButton);
+        return codeDiv;
+    }
+
+    function reverseTextBlocks(inputElement) {
+        const text = inputElement.value;
+        const blocks = text.split(/(?=Modify detected)/).reverse();
+        inputElement.value = blocks.join('');
+    }
+
+    function copyAllContents(container) {
+        const allCodes = Array.from(container.querySelectorAll('.code-passages'))
+            .map(div => div.innerText)
+            .join("\n");
+
+        navigator.clipboard.writeText(allCodes).then(() => {
+            alert("Tất cả kết quả đã được sao chép!");
+        }).catch(err => {
+            console.error("Error copying text: ", err);
+        });
+    }
+
+    function addCodeSection() {
+        sectionCount++;
+        const container = document.getElementById("codeContainer");
+        const codeSection = document.createElement("div");
+        codeSection.className = "code-section";
+        codeSection.innerHTML = `
+            <h2>Section ${sectionCount}</h2>
+            <label>Nhập offset: <input type="text" placeholder="e.g., 0x1000178dc"></label>
+            <label>Nhập byte: <input type="text" placeholder="e.g., C0035FD6"></label>
+            <button onclick="updateCode(this.parentNode)">Xác nhận</button>
+            <pre class="code-passages active"></pre>
+            <button onclick="copyCode(this.previousElementSibling)">Sao chép Active</button>
+            <pre class="code-passages deactive"></pre>
+            <button onclick="copyCode(this.previousElementSibling)">Sao chép Deactive</button>
+            <pre class="code-passages custom-active"></pre>
+            <button onclick="copyCode(this.previousElementSibling)">Sao chép Custom Active</button>
+            <pre class="code-passages custom-deactive"></pre>
+            <button onclick="copyCode(this.previousElementSibling)">Sao chép Custom Deactive</button>
+        `;
+        container.appendChild(codeSection);
+    }
+
+    function updateCode(section) {
+        const offsetInput = section.querySelector('input[placeholder*="offset"]');
+        const byteInput = section.querySelector('input[placeholder*="byte"]');
+        const activePre = section.querySelector('.code-passages.active');
+        const deactivePre = section.querySelector('.code-passages.deactive');
+        const customActivePre = section.querySelector('.code-passages.custom-active');
+        const customDeactivePre = section.querySelector('.code-passages.custom-deactive');
+
+        const offset = offsetInput.value;
+        const byte = byteInput.value;
+
+        const activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/UnityFramework") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);`;
+        const deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/UnityFramework") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);`;
+        const customActiveCode = `ActiveCodePatch("Frameworks/UnityFramework.framework/UnityFramework", ${offset}, "${byte}");`;
+        const customDeactiveCode = `DeactiveCodePatch("Frameworks/UnityFramework.framework/UnityFramework", ${offset}, "${byte}");`;
+
+        activePre.textContent = activeCode;
+        deactivePre.textContent = deactiveCode;
+        customActivePre.textContent = customActiveCode;
+        customDeactivePre.textContent = customDeactiveCode;
+    }
+
+    function copyCode(element) {
+        navigator.clipboard.writeText(element.textContent).then(() => {
+            alert("Mã đã được sao chép!");
+        }).catch(err => {
+            console.error("Error copying text: ", err);
+        });
+    }
+
+    function generateRandomHex(length) {
+        return [...Array(length)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+    }
+
+    function generateNearbyTemplates() {
+        const count = document.getElementById('templateCount').value;
+        const sampleActivePatchInput = document.getElementById('sampleActivePatch').value;
+        const outputDiv = document.getElementById('templateOutput');
+        outputDiv.innerHTML = '';
+
+        const regex = /ActiveCodePatch\("([^"]+)",\s*(0x[0-9a-fA-F]+),\s*"([0-9A-F]+)"\)/;
+        const match = sampleActivePatchInput.match(regex);
+
+        if (!match) {
+            alert('Định dạng mẫu ActiveCodePatch không hợp lệ.');
+            return;
+        }
+
+        const [, frameworkPath, offsetHex, byte] = match;
+        let baseOffset = parseInt(offsetHex, 16);
+
+        let allCode = '';
+
+        for (let i = 0; i < count; i++) {
+            const randomOffset = baseOffset + Math.floor(Math.random() * 201) - 100;
+            const randomOffsetHex = '0x' + randomOffset.toString(16).padStart(8, '0');
+
+            const activeCode = `ActiveCodePatch("${frameworkPath}", ${randomOffsetHex}, "${byte}");`;
+            const deactiveCode = `DeactiveCodePatch("${frameworkPath}", ${randomOffsetHex}, "${byte}");`;
+            allCode += activeCode + '\n' + deactiveCode + '\n\n';
+        }
+
+        const codeElement = document.createElement('pre');
+        codeElement.className = 'code-passages';
+        codeElement.textContent = allCode;
+        outputDiv.appendChild(codeElement);
+
+        const copyButton = document.createElement('button');
+        copyButton.textContent = 'Sao chép tất cả';
+        copyButton.onclick = function() {
+            navigator.clipboard.writeText(allCode).then(() => {
+                alert('Đã sao chép tất cả mã!');
+            });
+        };
+        outputDiv.appendChild(copyButton);
+    }
+
+    function generateEncryptedTemplates() {
+        const count = document.getElementById('templateCount').value;
+        const sampleActivePatchInput = document.getElementById('sampleActivePatch').value;
+        const outputDiv = document.getElementById('templateOutput');
+        outputDiv.innerHTML = '';
+
+        const regex = /ActiveCodePatch\("([^"]+)",\s*(0x[0-9a-fA-F]+),\s*"([0-9A-F]+)"\)/;
+        const match = sampleActivePatchInput.match(regex);
+
+        if (!match) {
+            alert('Định dạng mẫu ActiveCodePatch không hợp lệ.');
+            return;
+        }
+
+        const [, frameworkPath, , byte] = match;
+
+        let allCode = '';
+
+        for (let i = 0; i < count; i++) {
+            const randomOffset = '0x' + generateRandomHex(8);
+            const randomByte = generateRandomHex(byte.length).toUpperCase();
+
+            const activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("${frameworkPath}") UTF8String], ENCRYPTOFFSET("${randomOffset}"), (char*)[NSSENCRYPT("${randomByte}") UTF8String]);`;
+            const deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("${frameworkPath}") UTF8String], ENCRYPTOFFSET("${randomOffset}"), (char*)[NSSENCRYPT("${randomByte}") UTF8String]);`;
+
+            allCode += activeCode + '\n' + deactiveCode + '\n\n';
+        }
+
+        const codeElement = document.createElement('pre');
+        codeElement.className = 'code-passages';
+        codeElement.textContent = allCode;
+        outputDiv.appendChild(codeElement);
+
+        const copyButton = document.createElement('button');
+        copyButton.textContent = 'Sao chép tất cả';
+        copyButton.onclick = function() {
+            navigator.clipboard.writeText(allCode).then(() => {
+                alert('Đã sao chép tất cả mã!');
+            });
+        };
+        outputDiv.appendChild(copyButton);
+    }
+
+    function generateTemplates() {
+        const count = document.getElementById('templateCount').value;
+        const sampleActivePatchInput = document.getElementById('sampleActivePatch').value;
+        const outputDiv = document.getElementById('templateOutput');
+        outputDiv.innerHTML = '';
+
+        const regex = /ActiveCodePatch\("([^"]+)",\s*(0x[0-9a-fA-F]+),\s*"([0-9A-F]+)"\)/;
+        const match = sampleActivePatchInput.match(regex);
+
+        if (!match) {
+            alert('Định dạng mẫu ActiveCodePatch không hợp lệ.');
+            return;
+        }
+
+        const [, frameworkPath, , byte] = match;
+
+        let allCode = '';
+
+        for (let i = 0; i < count; i++) {
+            const randomOffset = '0x' + generateRandomHex(8);
+            const randomByte = generateRandomHex(byte.length).toUpperCase();
+
+            const activeCode = `ActiveCodePatch("${frameworkPath}", ${randomOffset}, "${randomByte}");`;
+            const deactiveCode = `DeactiveCodePatch("${frameworkPath}", ${randomOffset}, "${randomByte}");`;
+
+            allCode += activeCode + '\n' + deactiveCode + '\n\n';
+        }
+
+        const codeElement = document.createElement('pre');
+        codeElement.className = 'code-passages';
+        codeElement.textContent = allCode;
+        outputDiv.appendChild(codeElement);
+
+        const copyButton = document.createElement('button');
+        copyButton.textContent = 'Sao chép tất cả';
+        copyButton.onclick = function() {
+            navigator.clipboard.writeText(allCode).then(() => {
+                alert('Đã sao chép tất cả mã!');
+            });
+        };
+        outputDiv.appendChild(copyButton);
+    }
+
+    function processTextInputIDA2(container) {
+        const frameworkPath = "Frameworks/UnityFramework.framework/UnityFramework";
+        const textareas = container.getElementsByTagName('textarea');
+        const uniquePairs = new Map();
+
+        for (let i = 0; i < textareas.length; i++) {
+            const text = textareas[i].value;
             const regex = /Modify detected at: .+ \(IDA: (.+?)\)([\s\S]*?)(?=Modify detected|$)/g;
-            const allMatches = [...text.matchAll(regex)].reverse();
             const modRegex = /Org:\s*0x[\da-fA-F]+,\s*Mod:\s*0x([\da-fA-F]+)/g;
-            const uniquePairs = new Map();
 
-            allMatches.forEach(match => {
+            let match;
+            while ((match = regex.exec(text)) !== null) {
                 const idaOffset = match[1];
                 const modificationsBlock = match[2];
-                let modValue;
                 let byteSequence = '';
 
-                while ((modValue = modRegex.exec(modificationsBlock)) !== null) {
-                    byteSequence += modValue[1].padStart(2, '0').toUpperCase();
+                let modMatch;
+                while ((modMatch = modRegex.exec(modificationsBlock)) !== null) {
+                    byteSequence += modMatch[1].padStart(2, '0').toUpperCase();
                 }
 
                 if (!uniquePairs.has(idaOffset)) {
                     uniquePairs.set(idaOffset, byteSequence);
                 }
-            });
-
-            container.innerHTML = '';
-            uniquePairs.forEach((byteSequence, ida) => {
-                const offsetString = `"${ida}"`;
-
-                const activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/UnityFramework") UTF8String], ENCRYPTOFFSET(${offsetString}), (char*)[NSSENCRYPT("${byteSequence}") UTF8String]);`;
-                const deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/UnityFramework") UTF8String], ENCRYPTOFFSET(${offsetString}), (char*)[NSSENCRYPT("${byteSequence}") UTF8String]);`;
-
-                const activeDiv = createCodeDiv(activeCode);
-                const deactiveDiv = createCodeDiv(deactiveCode);
-
-                container.appendChild(activeDiv);
-                container.appendChild(deactiveDiv);
-            });
-        }
-
-        function updateCode(offsetInput, byteInput, activeOutputElement, deactiveOutputElement, customActiveOutputElement, customDeactiveOutputElement) {
-            const offset = offsetInput.value;
-            const byte = byteInput.value;
-
-            const activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/UnityFramework") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);`;
-            const deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/UnityFramework") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);`;
-
-            const customActiveCode = `ActiveCodePatch("Frameworks/UnityFramework.framework/UnityFramework", ${offset}, "${byte}");`;
-            const customDeactiveCode = `DeactiveCodePatch("Frameworks/UnityFramework.framework/UnityFramework", ${offset}, "${byte}");`;
-
-            activeOutputElement.innerText = activeCode;
-            deactiveOutputElement.innerText = deactiveCode;
-            customActiveOutputElement.innerText = customActiveCode;
-            customDeactiveOutputElement.innerText = customDeactiveCode;
-        }
-
-        function createCodeDiv(code) {
-            const codeDiv = document.createElement("div");
-            codeDiv.className = "code-block-container";
-
-            const codeContent = document.createElement("div");
-            codeContent.className = "code-passages";
-            codeContent.innerText = code;
-
-            const copyButton = document.createElement("button");
-            copyButton.className = "copy-button";
-            copyButton.innerText = "Sao chép";
-            copyButton.onclick = function() {
-                navigator.clipboard.writeText(code).then(() => {
-                    alert("Kết quả đã được sao chép!");
-                }).catch(err => {
-                    console.error("Error copying text: ", err);
-                });
-            };
-
-            codeDiv.appendChild(codeContent);
-            codeDiv.appendChild(copyButton);
-            return codeDiv;
-        }
-
-        function reverseTextBlocks(inputElement) {
-            const text = inputElement.value;
-            const blocks = text.split(/(?=Modify detected)/).reverse();
-            inputElement.value = blocks.join('');
-        }
-
-        function copyAllContents(container) {
-            const allCodes = Array.from(container.querySelectorAll('.code-passages'))
-                .map(div => div.innerText)
-                .join("\n");
-
-            navigator.clipboard.writeText(allCodes).then(() => {
-                alert("Tất cả kết quả đã được sao chép!");
-            }).catch(err => {
-                console.error("Error copying text: ", err);
-            });
-        }
-
-        function addCodeSection() {
-            sectionCount++;
-
-            const container = document.getElementById("codeContainer");
-
-            const codeSection = document.createElement("div");
-            codeSection.className = "code-section";
-
-            const sectionTitle = document.createElement("h2");
-            sectionTitle.innerText = `Section ${sectionCount}`;
-            codeSection.appendChild(sectionTitle);
-
-            const offsetLabel = document.createElement("label");
-            offsetLabel.innerText = "Nhập offset: ";
-
-            const offsetInput = document.createElement("input");
-            offsetInput.type = "text";
-            offsetInput.placeholder = "e.g., 0x1000178dc";
-
-            const byteLabel = document.createElement("label");
-            byteLabel.innerText = "Nhập byte: ";
-
-            const byteInput = document.createElement("input");
-            byteInput.type = "text";
-            byteInput.placeholder = "e.g., C0035FD6";
-
-            const activePre = document.createElement("pre");
-            activePre.className = "code-passages";
-
-            const deactivePre = document.createElement("pre");
-            deactivePre.className = "code-passages";
-
-            const customActivePre = document.createElement("pre");
-            customActivePre.className = "code-passages";
-
-            const customDeactivePre = document.createElement("pre");
-            customDeactivePre.className = "code-passages";
-
-            offsetInput.oninput = byteInput.oninput = function() {
-                updateCode(offsetInput, byteInput, activePre, deactivePre, customActivePre, customDeactivePre);
-            };
-
-            const buttonSave = document.createElement("button");
-            buttonSave.innerText = "Xác nhận";
-            buttonSave.onclick = function() {
-                alert("Offset và Byte đã được lưu!");
-            };
-
-            const buttonCopyActive = document.createElement("button");
-            buttonCopyActive.innerText = "Sao chép Active";
-            buttonCopyActive.onclick = function() {
-                navigator.clipboard.writeText(activePre.innerText).then(() => {
-                    alert("Mã Active đã được sao chép!");
-                });
-            };
-
-            const buttonCopyDeactive = document.createElement("button");
-            buttonCopyDeactive.innerText = "Sao chép Deactive";
-            buttonCopyDeactive.onclick = function() {
-                navigator.clipboard.writeText(deactivePre.innerText).then(() => {
-                    alert("Mã Deactive đã được sao chép!");
-                });
-            };
-
-            const buttonCopyCustomActive = document.createElement("button");
-            buttonCopyCustomActive.innerText = "Sao chép Custom Active"; 
-            buttonCopyCustomActive.onclick = function() {
-                navigator.clipboard.writeText(customActivePre.innerText).then(() => {
-                    alert("Mã custom active đã được sao chép!");
-                });
-            };
-
-            const buttonCopyCustomDeactive = document.createElement("button");
-            buttonCopyCustomDeactive.innerText = "Sao chép Custom Deactive";
-            buttonCopyCustomDeactive.onclick = function() {
-                navigator.clipboard.writeText(customDeactivePre.innerText).then(() => {
-                    alert("Mã custom deactive đã được sao chép!");
-                });
-            };
-
-            codeSection.appendChild(offsetLabel);
-            codeSection.appendChild(offsetInput);
-            codeSection.appendChild(byteLabel);
-            codeSection.appendChild(byteInput);
-            codeSection.appendChild(buttonSave);
-            codeSection.appendChild(document.createElement("br"));
-            codeSection.appendChild(activePre);
-            codeSection.appendChild(buttonCopyActive);
-            codeSection.appendChild(document.createElement("br"));
-            codeSection.appendChild(deactivePre);
-            codeSection.appendChild(buttonCopyDeactive);
-            codeSection.appendChild(document.createElement("br"));
-            codeSection.appendChild(customActivePre);
-            codeSection.appendChild(buttonCopyCustomActive);
-            codeSection.appendChild(document.createElement("br"));
-            codeSection.appendChild(customDeactivePre);
-            codeSection.appendChild(buttonCopyCustomDeactive);
-
-            container.appendChild(codeSection);
-        }
-
-        function processTextInputIDA2(container) {
-            const frameworkPath = "Frameworks/UnityFramework.framework/UnityFramework";
-            const textareas = container.getElementsByTagName('textarea');
-            const uniquePairs = new Map();
-
-            for (let i = 0; i < textareas.length; i++) {
-                const text = textareas[i].value;
-                const regex = /Modify detected at: .+ \(IDA: (.+?)\)([\s\S]*?)(?=Modify detected|$)/g;
-                const modRegex = /Org:\s*0x[\da-fA-F]+,\s*Mod:\s*0x([\da-fA-F]+)/g;
-
-                let match;
-                while ((match = regex.exec(text)) !== null) {
-                    const idaOffset = match[1];
-                    const modificationsBlock = match[2];
-                    let byteSequence = '';
-
-                    let modMatch;
-                    while ((modMatch = modRegex.exec(modificationsBlock)) !== null) {
-                        byteSequence += modMatch[1].padStart(2, '0').toUpperCase();
-                    }
-
-                    if (!uniquePairs.has(idaOffset)) {
-                        uniquePairs.set(idaOffset, byteSequence);
-                    }
-                }
             }
-
-            patches = [];
-            uniquePairs.forEach((byteSequence, ida) => {
-                patches.push({ offsetInput: { value: ida }, byteInput: { value: byteSequence } });
-            });
-
-            generateCode();
         }
 
-        function generateCode() {
-            const frameworkPath = "Frameworks/UnityFramework.framework/UnityFramework";
-            let activeCode = `
+        patches = [];
+        uniquePairs.forEach((byteSequence, ida) => {
+            patches.push({ offsetInput: { value: ida }, byteInput: { value: byteSequence } });
+        });
+
+        generateCode();
+    }
+
+    function generateCode() {
+        const frameworkPath = "Frameworks/UnityFramework.framework/UnityFramework";
+        let activeCode = `
 h5gg.require(7.9);
 var h5frida = h5gg.loadPlugin("h5frida", "h5frida-16.0.10.dylib");
 if (!h5frida) throw "Không thấy Frida";
@@ -370,266 +505,156 @@ function ActiveCodePatch(fpath, vaddr, bytes) {
 }
 
 function DeactiveCodePatch(fpath, vaddr, bytes) {
-	return h5frida.DeactiveCodePatch(fpath, vaddr, bytes);
+    return h5frida.DeactiveCodePatch(fpath, vaddr, bytes);
 }
 `;
 
-
-            for (let { offsetInput, byteInput } of patches) {
-                const offset = offsetInput.value;
-                const byte = byteInput.value;
-                if (offset && byte) {
-                    activeCode += `ActiveCodePatch("${frameworkPath}", ${offset}, "${byte}");\n`;
-                    activeCode += `DeactiveCodePatch("${frameworkPath}", ${offset}, "${byte}");\n\n`;
-                }
+        for (let { offsetInput, byteInput } of patches) {
+            const offset = offsetInput.value;
+            const byte = byteInput.value;
+            if (offset && byte) {
+	
+                activeCode += `ActiveCodePatch("${frameworkPath}", ${offset}, "${byte}");\n`;
+                activeCode += `DeactiveCodePatch("${frameworkPath}", ${offset}, "${byte}");\n\n`;
             }
-
-            document.getElementById('generated-code').textContent = activeCode;
         }
 
-        function copyToClipboard() {
-            const codeElement = document.getElementById('generated-code');
-            navigator.clipboard.writeText(codeElement.textContent).then(() => {
-                alert('Mã đã được sao vào clipboard!');
-            }).catch(err => {
-                alert('Sao chép văn bản thất bại: ' + err);
-            });
-        }
+        document.getElementById('generated-code').textContent = activeCode;
+    }
 
-        function reverseAllTextareas() {
-            const textareas = document.querySelectorAll('#ida-inputs textarea');
-            textareas.forEach(textarea => {
-                const text = textarea.value;
-                const blocks = text.split(/(?=Modify detected)/).reverse();
-                textarea.value = blocks.join('');
-            });
-        }
+    function copyToClipboard() {
+        const codeElement = document.getElementById('generated-code');
+        navigator.clipboard.writeText(codeElement.textContent).then(() => {
+            alert('Mã đã được sao vào clipboard!');
+        }).catch(err => {
+            alert('Sao chép văn bản thất bại: ' + err);
+        });
+    }
 
-        function generateRandomHex(length) {
-            return [...Array(length)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
-        }
+    function reverseAllTextareas() {
+        const textareas = document.querySelectorAll('#ida-inputs textarea');
+        textareas.forEach(textarea => {
+            const text = textarea.value;
+            const blocks = text.split(/(?=Modify detected)/).reverse();
+            textarea.value = blocks.join('');
+        });
+    }
 
-        function generateNearbyTemplates() {
-            const count = document.getElementById('templateCount').value;
-            const sampleActivePatchInput = document.getElementById('sampleActivePatch').value;
-            const outputDiv = document.getElementById('templateOutput');
-            outputDiv.innerHTML = '';
+    window.onload = function() {
+        const container = document.getElementById("codeContainer");
 
-            const regex = /ActiveCodePatch\("([^"]+)",\s*(0x[0-9a-fA-F]+),\s*"([0-9A-F]+)"\)/;
-            const match = sampleActivePatchInput.match(regex);
+        const inputSection = document.createElement("div");
+        inputSection.className = "input-section";
 
-            if (!match) {
-                alert('Định dạng mẫu ActiveCodePatch không hợp lệ.');
-                return;
-            }
+        const inputLabel = document.createElement("label");
+        inputLabel.innerText = "Nhập dữ liệu từ IDA:";
+        inputSection.appendChild(inputLabel);
 
-            const [, frameworkPath, offsetHex, byte] = match;
-            let baseOffset = parseInt(offsetHex, 16);
+        const textInput = document.createElement("textarea");
+        inputSection.appendChild(textInput);
 
-            let allCode = '';
-
-            for (let i = 0; i < count; i++) {
-                // Tạo offset ngẫu nhiên trong khoảng ±100 byte
-                const randomOffset = baseOffset + Math.floor(Math.random() * 201) - 100;
-                const randomOffsetHex = '0x' + randomOffset.toString(16).padStart(8, '0');
-
-                const activeCode = `ActiveCodePatch("${frameworkPath}", ${randomOffsetHex}, "${byte}");`;
-                const deactiveCode = `DeactiveCodePatch("${frameworkPath}", ${randomOffsetHex}, "${byte}");`;
-                allCode += activeCode + '\n' + deactiveCode + '\n\n';
-            }
-
-            const codeElement = document.createElement('pre');
-            codeElement.className = 'code-passages';
-            codeElement.textContent = allCode;
-            outputDiv.appendChild(codeElement);
-
-            const copyButton = document.createElement('button');
-            copyButton.textContent = 'Sao chép tất cả';
-            copyButton.onclick = function() {
-                navigator.clipboard.writeText(allCode).then(() => {
-                    alert('Đã sao chép tất cả mã!');
-                });
-            };
-            outputDiv.appendChild(copyButton);
-        }
-
-        function generateEncryptedTemplates() {
-            const count = document.getElementById('templateCount').value;
-            const sampleActivePatchInput = document.getElementById('sampleActivePatch').value;
-            const outputDiv = document.getElementById('templateOutput');
-            outputDiv.innerHTML = '';
-
-            const regex = /ActiveCodePatch\("([^"]+)",\s*(0x[0-9a-fA-F]+),\s*"([0-9A-F]+)"\)/;
-            const match = sampleActivePatchInput.match(regex);
-
-            if (!match) {
-                alert('Định dạng mẫu ActiveCodePatch không hợp lệ.');
-                return;
-            }
-
-            const [, frameworkPath, , byte] = match;
-
-            let allCode = '';
-
-            for (let i = 0; i < count; i++) {
-                const randomOffset = '0x' + generateRandomHex(8);
-                const randomByte = generateRandomHex(byte.length).toUpperCase();
-
-                const activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("${frameworkPath}") UTF8String], ENCRYPTOFFSET("${randomOffset}"), (char*)[NSSENCRYPT("${randomByte}") UTF8String]);`;
-                const deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("${frameworkPath}") UTF8String], ENCRYPTOFFSET("${randomOffset}"), (char*)[NSSENCRYPT("${randomByte}") UTF8String]);`;
-
-                allCode += activeCode + '\n' + deactiveCode + '\n\n';
-            }
-
-            const codeElement = document.createElement('pre');
-            codeElement.className = 'code-passages';
-            codeElement.textContent = allCode;
-            outputDiv.appendChild(codeElement);
-
-            const copyButton = document.createElement('button');
-            copyButton.textContent = 'Sao chép tất cả';
-            copyButton.onclick = function() {
-                navigator.clipboard.writeText(allCode).then(() => {
-                    alert('Đã sao chép tất cả mã!');
-                });
-            };
-            outputDiv.appendChild(copyButton);
-        }
-
-        window.onload = function() {
-            const container = document.getElementById("codeContainer");
-
-            const inputSection = document.createElement("div");
-            inputSection.className = "input-section";
-
-            const inputLabel = document.createElement("label");
-            inputLabel.innerText = "Nhập dữ liệu từ IDA:";
-            inputSection.appendChild(inputLabel);
-
-            const textInput = document.createElement("textarea");
-            inputSection.appendChild(textInput);
-
-            const buttonReverse = document.createElement("button");
-            buttonReverse.innerText = "Đảo ngược các khối văn bản";
-            buttonReverse.onclick = function() {
-                reverseTextBlocks(textInput);
-            };
-
-            const buttonProcess = document.createElement("button");
-            buttonProcess.innerText = "Chuyển đổi và lọc";
-            const outputContainer = document.createElement("div");
-
-            buttonProcess.onclick = function() {
-                processTextInput(textInput, outputContainer);
-            };
-
-            const buttonCopyAll = document.createElement("button");
-            
-            buttonCopyAll.innerText = "Sao Chép Tất Cả";
-            buttonCopyAll.onclick = function() {
-                copyAllContents(outputContainer);
-            };
-
-            inputSection.appendChild(buttonReverse);
-            inputSection.appendChild(buttonProcess);
-            inputSection.appendChild(outputContainer);
-            inputSection.appendChild(buttonCopyAll);
-            container.appendChild(inputSection);
-            
-            addCodeSection(); // Thêm phần code ban đầu
-
-            // New section starts here
-            const newContainer = document.createElement('div');
-            newContainer.id = 'container';
-            container.appendChild(newContainer);
-
-            const inputContainer = document.createElement('div');
-            inputContainer.id = 'input-container';
-            inputContainer.className = 'input-section';
-            newContainer.appendChild(inputContainer);
-            
-            const label = document.createElement('label');
-            label.innerText = 'Nhập dữ liệu từ IDA 2:';
-            inputContainer.appendChild(label);
-            
-            const idaInputs = document.createElement('div');
-            idaInputs.id = 'ida-inputs';
-            inputContainer.appendChild(idaInputs);
-            
-            const textarea = document.createElement('textarea');
-            idaInputs.appendChild(textarea);
-            
-            const addTextareaButton = document.createElement('button');
-            addTextareaButton.innerText = 'Thêm ô nhập dữ liệu';
-            addTextareaButton.onclick = function() {
-                const newTextarea = document.createElement('textarea');
-                idaInputs.appendChild(newTextarea);
-            };
-            inputContainer.appendChild(addTextareaButton);
-            
-            const reverseButton = document.createElement('button');
-            reverseButton.innerText = 'Đảo ngược tất cả văn bản';
-            reverseButton.onclick = function() {
-                reverseAllTextareas();
-            };
-            inputContainer.appendChild(reverseButton);
-            
-            const processButton = document.createElement('button');
-            processButton.innerText = 'Chuyển đổi và lọc';
-            processButton.onclick = function() {
-                processTextInputIDA2(idaInputs);
-            };
-            inputContainer.appendChild(processButton);
-
-            const resultHeader = document.createElement('h3');
-            resultHeader.innerText = 'Kết Quả:';
-            newContainer.appendChild(resultHeader);
-            
-            const generatedCode = document.createElement('pre');
-            generatedCode.id = 'generated-code';
-            generatedCode.className = 'code-passages';
-            newContainer.appendChild(generatedCode);
-            
-            const copyToClipboardButton = document.createElement('button');
-            copyToClipboardButton.type = 'button';
-            copyToClipboardButton.innerText = 'Sao chép vào clipboard';
-            copyToClipboardButton.onclick = function() {
-                copyToClipboard();
-            };
-            newContainer.appendChild(copyToClipboardButton);
-
-            // Template Generator
-            const templateGenerator = document.getElementById('templateGenerator');
-            
-            const sampleActivePatchLabel = document.createElement('label');
-            sampleActivePatchLabel.innerText = 'Nhập mẫu ActiveCodePatch:';
-            templateGenerator.insertBefore(sampleActivePatchLabel, templateGenerator.children[2]);
-
-            const sampleActivePatchInput = document.createElement('input');
-            sampleActivePatchInput.type = 'text';
-            sampleActivePatchInput.id = 'sampleActivePatch';
-            sampleActivePatchInput.placeholder = 'Ví dụ: ActiveCodePatch("Frameworks/UnityFramework.framework/UnityFramework", 0xdd639e32, "3BABE621")';
-            templateGenerator.insertBefore(sampleActivePatchInput, templateGenerator.children[3]);
-
-            const generateNearbyButton = document.createElement('button');
-            generateNearbyButton.innerText = 'Tạo Biểu Mẫu Gần offset Và Byte';
-            generateNearbyButton.onclick = generateNearbyTemplates;
-            templateGenerator.insertBefore(generateNearbyButton, templateGenerator.lastElementChild);
+        const buttonReverse = document.createElement("button");
+        buttonReverse.innerText = "Đảo ngược các khối văn bản";
+        buttonReverse.onclick = function() {
+            reverseTextBlocks(textInput);
         };
-    </script>
-</head>
-<body>
-    <h1>GHOST - DVC IPA</h1>
-    <div id="codeContainer"></div>
-    <button onclick="addCodeSection()">Thêm Offset Khác</button>
-    <button onclick="copyAllContents(document.getElementById('codeContainer'))">Sao Chép Tất Cả</button>
-    
-    <div id="templateGenerator" class="input-section">
-        <h2>Tạo Nhiều Biểu Mẫu</h2>
-        <input type="number" id="templateCount" value="200" min="1" max="1000">
-        <button onclick="generateTemplates()">Tạo Biểu Mẫu</button>
-        <button onclick="generateEncryptedTemplates()">Tạo Biểu Mẫu Mã Hóa</button>
-        <div id="templateOutput"></div>
-    </div>
+
+        const buttonProcess = document.createElement("button");
+        buttonProcess.innerText = "Chuyển đổi và lọc";
+        const outputContainer = document.createElement("div");
+
+        buttonProcess.onclick = function() {
+            processTextInput(textInput, outputContainer);
+        };
+
+        const buttonCopyAll = document.createElement("button");
+        
+        buttonCopyAll.innerText = "Sao Chép Tất Cả";
+        buttonCopyAll.onclick = function() {
+            copyAllContents(outputContainer);
+        };
+
+        inputSection.appendChild(buttonReverse);
+        inputSection.appendChild(buttonProcess);
+        inputSection.appendChild(outputContainer);
+        inputSection.appendChild(buttonCopyAll);
+        container.appendChild(inputSection);
+        
+        addCodeSection(); // Thêm phần code ban đầu
+
+        // New section starts here
+        const newContainer = document.createElement('div');
+        newContainer.id = 'container';
+        container.appendChild(newContainer);
+
+        const inputContainer = document.createElement('div');
+        inputContainer.id = 'input-container';
+        inputContainer.className = 'input-section';
+        newContainer.appendChild(inputContainer);
+        
+        const label = document.createElement('label');
+        label.innerText = 'Nhập dữ liệu từ IDA 2:';
+        inputContainer.appendChild(label);
+        
+        const idaInputs = document.createElement('div');
+        idaInputs.id = 'ida-inputs';
+        inputContainer.appendChild(idaInputs);
+        
+        const textarea = document.createElement('textarea');
+        idaInputs.appendChild(textarea);
+        
+        const addTextareaButton = document.createElement('button');
+        addTextareaButton.innerText = 'Thêm ô nhập dữ liệu';
+        addTextareaButton.onclick = function() {
+            const newTextarea = document.createElement('textarea');
+            idaInputs.appendChild(newTextarea);
+        };
+        inputContainer.appendChild(addTextareaButton);
+        
+        const reverseButton = document.createElement('button');
+        reverseButton.innerText = 'Đảo ngược tất cả văn bản';
+        reverseButton.onclick = function() {
+            reverseAllTextareas();
+        };
+        inputContainer.appendChild(reverseButton);
+        
+        const processButton = document.createElement('button');
+        processButton.innerText = 'Chuyển đổi và lọc';
+        processButton.onclick = function() {
+            processTextInputIDA2(idaInputs);
+        };
+        inputContainer.appendChild(processButton);
+
+        const resultHeader = document.createElement('h3');
+        resultHeader.innerText = 'Kết Quả:';
+        newContainer.appendChild(resultHeader);
+        
+        const generatedCode = document.createElement('pre');
+        generatedCode.id = 'generated-code';
+        generatedCode.className = 'code-passages';
+        newContainer.appendChild(generatedCode);
+        
+        const copyToClipboardButton = document.createElement('button');
+        copyToClipboardButton.type = 'button';
+        copyToClipboardButton.innerText = 'Sao chép vào clipboard';
+        copyToClipboardButton.onclick = function() {
+            copyToClipboard();
+        };
+        newContainer.appendChild(copyToClipboardButton);
+
+        // Add snowfall effect
+        for (let i = 0; i < 50; i++) {
+            let snowflake = document.createElement('div');
+            snowflake.className = 'snowflake';
+            snowflake.style.left = `${Math.random() * 100}vw`;
+            snowflake.style.animationDuration = `${Math.random() * 3 + 5}s`;
+            snowflake.style.opacity = Math.random();
+            snowflake.style.fontSize = `${Math.random() * 10 + 10}px`;
+            snowflake.innerHTML = '❄';
+            document.body.appendChild(snowflake);
+        }
+    };
+</script>
+
 </body>
 </html>
