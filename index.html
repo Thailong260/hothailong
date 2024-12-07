@@ -6,274 +6,259 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GHOST - DVC IPA Christmas Edition</title>
     <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
-:root {
-    --primary-bg: #0a0e29;
-    --secondary-bg: #1a237e;
-    --text-color: #e8f1f2;
-    --highlight-color: #ffd700;
-    --button-color: #c41e3a;
-    --button-hover: #e63946;
-}
+        :root {
+            --primary-bg: #0a0e29;
+            --secondary-bg: #1a237e;
+            --text-color: #e8f1f2;
+            --highlight-color: #ffd700;
+            --button-color: #c41e3a;
+            --button-hover: #e63946;
+        }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: var(--primary-bg);
-    color: var(--text-color);
-    line-height: 1.6;
-    padding: 20px;
-    background-image: 
-        url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.2)"/></svg>'),
-        radial-gradient(circle, var(--secondary-bg) 0%, var(--primary-bg) 100%);
-    background-attachment: fixed;
-    background-size: 100px 100px, cover;
-}
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            background-image: 
+                url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.2)"/></svg>'),
+                radial-gradient(circle, var(--secondary-bg) 0%, var(--primary-bg) 100%);
+            background-attachment: fixed;
+            background-size: 100px 100px, cover;
+        }
 
-h1, h2 {
-    color: var(--highlight-color);
-    text-align: center;
-    padding: 20px 0;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-}
+        h1, h2 {
+            color: var(--highlight-color);
+            text-align: center;
+            padding: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
 
-#codeContainer, #container, #templateGenerator {
-    max-width: 800px;
-    margin: 30px auto;
-    padding: 20px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
-}
+        #codeContainer, #container, #templateGenerator {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
 
-.input-section, .code-section {
-    margin-bottom: 20px;
-    padding: 15px;
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
+        .input-section, .code-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-label {
-    display: block;
-    margin-bottom: 5px;
-    color: var(--highlight-color);
-    font-weight: 600;
-}
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--highlight-color);
+            font-weight: 600;
+        }
 
-input[type="text"], input[type="number"], textarea {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 5px;
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--text-color);
-    font-size: 14px;
-}
+        input[type="text"], input[type="number"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            font-size: 14px;
+        }
 
-textarea {
-    height: 100px;
-    resize: vertical;
-}
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
 
-.button-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 10px;
-    margin-top: 20px;
-}
+        button {
+            background-color: var(--button-color);
+            color: white;
+            padding: 10px 20px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            font-size: 14px;
+            font-weight: 600;
+        }
 
-button {
-    background-color: var(--button-color);
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-    font-size: 14px;
-    font-weight: 600;
-    flex: 1 1 auto;
-    min-width: 150px;
-    margin: 5px;
-}
+        button:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-2px);
+        }
 
-button:hover {
-    background-color: var(--button-hover);
-    transform: translateY(-2px);
-}
+        button:active {
+            transform: translateY(1px);
+        }
 
-button:active {
-    transform: translateY(1px);
-}
+        .code-passages {
+            background-color: rgba(10, 35, 66, 0.8);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--highlight-color);
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: var(--text-color);
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
 
-.code-passages {
-    background-color: rgba(10, 35, 66, 0.8);
-    padding: 15px;
-    margin-bottom: 10px;
-    border-left: 3px solid var(--highlight-color);
-    border-radius: 5px;
-    overflow-x: auto;
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-    color: var(--text-color);
-    white-space: pre-wrap;
-    word-break: break-all;
-}
+        .copy-button {
+            display: block;
+            margin: 5px auto;
+            background-color: #4caf50;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.3s ease;
+        }
 
-.copy-button {
-    display: block;
-    margin: 5px auto;
-    background-color: #4caf50;
-    color: white;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    transition: background-color 0.3s ease;
-}
+        .copy-button:hover {
+            background-color: #45a049;
+        }
 
-.copy-button:hover {
-    background-color: #45a049;
-}
+        #templateCount {
+            width: 100px;
+            margin-right: 10px;
+        }
 
-#templateCount {
-    width: 100px;
-    margin-right: 10px;
-}
+        #templateOutput {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
 
-#templateOutput {
-    margin-top: 20px;
-    max-height: 400px;
-    overflow-y: auto;
-}
+        .snowflake {
+            color: #fff;
+            font-size: 1em;
+            font-family: Arial, sans-serif;
+            text-shadow: 0 0 5px #000;
+            position: fixed;
+            top: -10%;
+            z-index: 9999;
+            user-select: none;
+            cursor: default;
+            animation: snowfall 10s linear infinite;
+        }
 
-.snowflake {
-    color: #fff;
-    font-size: 1em;
-    font-family: Arial, sans-serif;
-    text-shadow: 0 0 5px #000;
-    position: fixed;
-    top: -10%;
-    z-index: 9999;
-    user-select: none;
-    cursor: default;
-    animation: snowfall 10s linear infinite;
-}
+        @keyframes snowfall {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(100vh) rotate(360deg); }
+        }
 
-@keyframes snowfall {
-    0% { transform: translateY(0) rotate(0deg); }
-    100% { transform: translateY(100vh) rotate(360deg); }
-}
+        .gift-box {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background-color: #ff0000;
+            border: 2px solid var(--highlight-color);
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.3s;
+        }
 
-.gift-box {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    background-color: #ff0000;
-    border: 2px solid var(--highlight-color);
-    border-radius: 5px;
-    cursor: pointer;
-    z-index: 1000;
-    transition: transform 0.3s;
-}
+        .gift-box:before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 20px;
+            top: -10px;
+            left: 0;
+            background-color: var(--highlight-color);
+            border-radius: 5px;
+        }
 
-.gift-box:before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 20px;
-    top: -10px;
-    left: 0;
-    background-color: var(--highlight-color);
-    border-radius: 5px;
-}
+        .gift-box:after {
+            content: '🎁';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
+        }
 
-.gift-box:after {
-    content: '🎁';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 30px;
-}
+        .gift-box:hover {
+            transform: scale(1.1);
+        }
 
-.gift-box:hover {
-    transform: scale(1.1);
-}
+        .santa {
+            position: fixed;
+            left: -150px;
+            bottom: 20px;
+            font-size: 50px;
+            animation: santa-move 20s linear infinite;
+            z-index: 1000;
+        }
 
-.santa {
-    position: fixed;
-    left: -150px;
-    bottom: 20px;
-    font-size: 50px;
-    animation: santa-move 20s linear infinite;
-    z-index: 1000;
-}
+        @keyframes santa-move {
+            0% { left: -150px; }
+            100% { left: calc(100% + 150px); }
+        }
 
-@keyframes santa-move {
-    0% { left: -150px; }
-    100% { left: calc(100% + 150px); }
-}
+        /* Responsive design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
 
-/* Responsive design */
-@media (max-width: 768px) {
-    body {
-        padding: 10px;
-    }
+            h1 {
+                font-size: 24px;
+            }
 
-    h1 {
-        font-size: 24px;
-    }
+            h2 {
+                font-size: 20px;
+            }
 
-    h2 {
-        font-size: 20px;
-    }
+            #codeContainer, #container, #templateGenerator {
+                padding: 15px;
+            }
 
-    #codeContainer, #container, #templateGenerator {
-        padding: 15px;
-    }
+            button {
+                width: 100%;
+                margin: 5px 0;
+            }
 
-    .button-container {
-        flex-direction: column;
-    }
+            .gift-box, .santa {
+                display: none;
+            }
+        }
 
-    button {
-        width: 100%;
-        margin: 5px 0;
-    }
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 20px;
+            }
 
-    .gift-box, .santa {
-        display: none;
-    }
-}
+            h2 {
+                font-size: 18px;
+            }
 
-@media (max-width: 480px) {
-    h1 {
-        font-size: 20px;
-    }
-
-    h2 {
-        font-size: 18px;
-    }
-
-    .code-passages {
-        font-size: 10px;
-    }
-}
-
+            .code-passages {
+                font-size: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -419,6 +404,7 @@ function updateCode(section) {
     const byteInput = section.querySelector('.byte-input');
     const activePre = section.querySelector('.code-passages.active');
     const deactivePre = section.querySelector('.code-passages.deactive');
+    
     const customActivePre = section.querySelector('.code-passages.custom-active');
     const customDeactivePre = section.querySelector('.code-passages.custom-deactive');
 
@@ -758,8 +744,7 @@ document.addEventListener('DOMContentLoaded', function() {
     idaInputs.id = 'ida-inputs';
     inputContainer.appendChild(idaInputs);
     
-    const textarea = document.createElement('textarea');
-    idaInputs.appendChild(textarea);
+    const textarea = document.createElement('textarea');idaInputs.appendChild(textarea);
     
     const addTextareaButton = document.createElement('button');
     addTextareaButton.innerText = 'Thêm ô nhập dữ liệu';
