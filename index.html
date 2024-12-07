@@ -186,10 +186,17 @@
         <div id="templateOutput"></div>
     </div>
 
-    
 <script>
     let sectionCount = 0;
     let patches = [];
+
+    function showTemporaryMessage(element, message, duration = 2000) {
+        const originalText = element.innerText;
+        element.innerText = message;
+        setTimeout(() => {
+            element.innerText = originalText;
+        }, duration);
+    }
 
     function processTextInput(inputElement, container) {
         const text = inputElement.value;
@@ -241,7 +248,7 @@
         copyButton.innerText = "Sao chép";
         copyButton.onclick = function() {
             navigator.clipboard.writeText(code).then(() => {
-                alert("Kết quả đã được sao chép!");
+                showTemporaryMessage(this, "Đã sao chép!");
             }).catch(err => {
                 console.error("Error copying text: ", err);
             });
@@ -264,7 +271,7 @@
             .join("\n");
 
         navigator.clipboard.writeText(allCodes).then(() => {
-            alert("Tất cả kết quả đã được sao chép!");
+            showTemporaryMessage(event.target, "Đã sao chép tất cả!");
         }).catch(err => {
             console.error("Error copying text: ", err);
         });
@@ -316,7 +323,7 @@
 
     function copyCode(element) {
         navigator.clipboard.writeText(element.textContent).then(() => {
-            alert("Mã đã được sao chép!");
+            showTemporaryMessage(element.nextElementSibling, "Đã sao chép!");
         }).catch(err => {
             console.error("Error copying text: ", err);
         });
@@ -326,6 +333,7 @@
         return [...Array(length)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
     }
 
+    
     function generateNearbyTemplates() {
         const count = document.getElementById('templateCount').value;
         const sampleActivePatchInput = document.getElementById('sampleActivePatch').value;
@@ -363,7 +371,7 @@
         copyButton.textContent = 'Sao chép tất cả';
         copyButton.onclick = function() {
             navigator.clipboard.writeText(allCode).then(() => {
-                alert('Đã sao chép tất cả mã!');
+                showTemporaryMessage(this, 'Đã sao chép tất cả!');
             });
         };
         outputDiv.appendChild(copyButton);
@@ -406,7 +414,7 @@
         copyButton.textContent = 'Sao chép tất cả';
         copyButton.onclick = function() {
             navigator.clipboard.writeText(allCode).then(() => {
-                alert('Đã sao chép tất cả mã!');
+                showTemporaryMessage(this, 'Đã sao chép tất cả!');
             });
         };
         outputDiv.appendChild(copyButton);
@@ -449,7 +457,7 @@
         copyButton.textContent = 'Sao chép tất cả';
         copyButton.onclick = function() {
             navigator.clipboard.writeText(allCode).then(() => {
-                alert('Đã sao chép tất cả mã!');
+                showTemporaryMessage(this, 'Đã sao chép tất cả!');
             });
         };
         outputDiv.appendChild(copyButton);
@@ -513,7 +521,6 @@ function DeactiveCodePatch(fpath, vaddr, bytes) {
             const offset = offsetInput.value;
             const byte = byteInput.value;
             if (offset && byte) {
-	
                 activeCode += `ActiveCodePatch("${frameworkPath}", ${offset}, "${byte}");\n`;
                 activeCode += `DeactiveCodePatch("${frameworkPath}", ${offset}, "${byte}");\n\n`;
             }
@@ -525,9 +532,9 @@ function DeactiveCodePatch(fpath, vaddr, bytes) {
     function copyToClipboard() {
         const codeElement = document.getElementById('generated-code');
         navigator.clipboard.writeText(codeElement.textContent).then(() => {
-            alert('Mã đã được sao vào clipboard!');
+            showTemporaryMessage(event.target, 'Đã sao chép vào clipboard!');
         }).catch(err => {
-            alert('Sao chép văn bản thất bại: ' + err);
+            console.error('Sao chép văn bản thất bại: ' + err);
         });
     }
 
