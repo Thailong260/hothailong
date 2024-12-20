@@ -148,76 +148,6 @@
             overflow-y: auto;
         }
 
-        .snowflake {
-            color: #fff;
-            font-size: 1em;
-            font-family: Arial, sans-serif;
-            text-shadow: 0 0 5px #000;
-            position: fixed;
-            top: -10%;
-            z-index: 9999;
-            user-select: none;
-            cursor: default;
-            animation: snowfall 10s linear infinite;
-        }
-
-        @keyframes snowfall {
-            0% { transform: translateY(0) rotate(0deg); }
-            100% { transform: translateY(100vh) rotate(360deg); }
-        }
-
-        .gift-box {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background-color: #ff0000;
-            border: 2px solid var(--highlight-color);
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 1000;
-            transition: transform 0.3s;
-        }
-
-        .gift-box:before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 20px;
-            top: -10px;
-            left: 0;
-            background-color: var(--highlight-color);
-            border-radius: 5px;
-        }
-
-        .gift-box:after {
-            content: '🎁';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 30px;
-        }
-
-        .gift-box:hover {
-            transform: scale(1.1);
-        }
-
-        .santa {
-            position: fixed;
-            left: -150px;
-            bottom: 20px;
-            font-size: 50px;
-            animation: santa-move 20s linear infinite;
-            z-index: 1000;
-        }
-
-        @keyframes santa-move {
-            0% { left: -150px; }
-            100% { left: calc(100% + 150px); }
-        }
-
         /* Responsive design */
         @media (max-width: 768px) {
             body {
@@ -239,10 +169,6 @@
             button {
                 width: 100%;
                 margin: 5px 0;
-            }
-
-            .gift-box, .santa {
-                display: none;
             }
         }
 
@@ -444,6 +370,7 @@ function copyCode(element) {
 function generateRandomHex(length) {
     return [...Array(length)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 }
+
 
 function generateNearbyTemplates() {
     const count = document.getElementById('templateCount').value;
@@ -658,39 +585,6 @@ function reverseAllTextareas() {
     });
 }
 
-function createSnowflakes() {
-    const snowflakesCount = 100;
-    const snowflakeCharacters = ['❅', '❆', '❄', '✺', '✵', '✹', '✷', '✶', '•', '∗', '⁕', '⁑', '⁂', '☃', '⛄'];
-    
-    for (let i = 0; i < snowflakesCount; i++) {
-        let snowflake = document.createElement('div');
-        snowflake.className = 'snowflake';
-        snowflake.style.left = `${Math.random() * 100}vw`;
-        snowflake.style.animationDuration = `${Math.random() * 3 + 5}s`;
-        snowflake.style.animationDelay = `${Math.random() * 5}s`;
-        snowflake.style.opacity = Math.random();
-        snowflake.style.fontSize = `${Math.random() * 10 + 10}px`;
-        snowflake.innerHTML = snowflakeCharacters[Math.floor(Math.random() * snowflakeCharacters.length)];
-        document.body.appendChild(snowflake);
-    }
-}
-
-function createGiftBox() {
-    const giftBox = document.createElement('div');
-    giftBox.className = 'gift-box';
-    giftBox.addEventListener('click', () => {
-        alert('Chúc mừng Giáng sinh! 🎄🎅');
-    });
-    document.body.appendChild(giftBox);
-}
-
-function createSanta() {
-    const santa = document.createElement('div');
-    santa.className = 'santa';
-    santa.textContent = '🎅';
-    document.body.appendChild(santa);
-}
-
 document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById("codeContainer");
 
@@ -744,7 +638,8 @@ document.addEventListener('DOMContentLoaded', function() {
     idaInputs.id = 'ida-inputs';
     inputContainer.appendChild(idaInputs);
     
-    const textarea = document.createElement('textarea');idaInputs.appendChild(textarea);
+    const textarea = document.createElement('textarea');
+    idaInputs.appendChild(textarea);
     
     const addTextareaButton = document.createElement('button');
     addTextareaButton.innerText = 'Thêm ô nhập dữ liệu';
@@ -786,11 +681,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('generateEncryptedButton').addEventListener('click', generateEncryptedTemplates);
     document.getElementById('generateNonEncryptedButton').addEventListener('click', generateTemplates);
     document.getElementById('generateNearbyButton').addEventListener('click', generateNearbyTemplates);
-
-    // Create Christmas effects
-    createSnowflakes();
-    createGiftBox();
-    createSanta();
 });
 </script>
 
