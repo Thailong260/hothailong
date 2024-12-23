@@ -563,10 +563,143 @@ function DeactiveCodePatch(fpath, vaddr, bytes) {
     document.getElementById('generated-code').textContent = activeCode;
 }
 
+function processTextInputIDA2Simplified(container) {
+    const frameworkName = document.getElementById('frameworkName').value || "UnityFramework";
+    const textareas = container.getElementsByTagName('textarea');
+    const uniquePairs = new Map();
+
+    for (let i = 0; i < textareas.length; i++) {
+        const text = textareas[i].value;
+        const regex = /Modify detected at: .+ \(IDA: (.+?)\)([\s\S]*?)(?=Modify detected|$)/g;
+        const modRegex = /Org:\s*0x[\da-fA-F]+,\s*Mod:\s*0x([\da-fA-F]+)/g;
+
+        let match;
+        while ((match = regex.exec(text)) !== null) {
+            const idaOffset = match[1];
+            const modificationsBlock = match[2];
+            let byteSequence = '';
+
+            let modMatch;
+            while ((modMatch = modRegex.exec(modificationsBlock)) !== null) {
+                byteSequence += modMatch[1].padStart(2, '0').toUpperCase();
+            }
+
+            if (!uniquePairs.has(idaOffset)) {
+                uniquePairs.set(idaOffset, byteSequence);
+            }
+        }
+    }
+
+    patches = [];
+    uniquePairs.forEach((byteSequence, ida) => {
+        patches.push({ offsetInput: { value: ida }, byteInput: { value: byteSequence } });
+    });
+
+    generateCodeSimplified();
+}
+
+function generateCodeSimplified() {
+    const frameworkName = document.getElementById('frameworkName').value || "UnityFramework";
+    let activeCode = `
+h5gg.require(7.9);
+var h5frida = h5gg.loadPlugin("h5frida", "h5frida-16.0.10.dylib");
+if (!h5frida) throw "Không thấy Frida";
+
+function ActiveCodePatch(fpath, vaddr, bytes) {
+    if (!h5frida.ActiveCodePatch(fpath, vaddr, bytes)) {
+        h5frida.ApplyCodePatch(fpath, vaddr, bytes);
+    }
+    return true;
+}
+
+function DeactiveCodePatch(fpath, vaddr, bytes) {
+    return h5frida.DeactiveCodePatch(fpath, vaddr, bytes);
+}
+`;
+
+    for (let { offsetInput, byteInput } of patches) {
+        const offset = offsetInput.value;
+        const byte = byteInput.value;
+        if (offset && byte) {
+            activeCode += `ActiveCodePatch("${frameworkName}", "${offset}", "${byte}");\n`;
+            activeCode += `DeactiveCodePatch("${frameworkName}", "${offset}", "${byte}");\n\n`;
+        }
+    }
+
+    document.getElementById('generated-code').textContent = activeCode;
+}
+
+function processTextInputIDA2Full(container) {
+    const frameworkName = document.getElementById('frameworkName').value || "UnityFramework";
+    const textareas = container.getElementsByTagName('textarea');
+    const uniquePairs = new Map();
+
+    for (let i = 0; i < textareas.length; i++) {
+        const text = textareas[i].value;
+        const regex = /Modify detected at: .+ \(IDA: (.+?)\)([\s\S]*?)(?=Modify detected|$)/g;
+        const modRegex = /Org:\s*0x[\da-fA-F]+,\s*Mod:\s*0x([\da-fA-F]+)/g;
+
+        let match;
+        while ((match = regex.exec(text)) !== null) {
+            const idaOffset = match[1];
+            const modificationsBlock = match[2];
+            let byteSequence = '';
+
+            let modMatch;
+            while ((modMatch = modRegex.exec(modificationsBlock)) !== null) {
+                byteSequence += modMatch[1].padStart(2, '0').toUpperCase();
+            }
+
+            if (!uniquePairs.has(idaOffset)) {
+                uniquePairs.set(idaOffset, byteSequence);
+            }
+        }
+    }
+
+    patches = [];
+    uniquePairs.forEach((byteSequence, ida) => {
+        patches.push({ offsetInput: { value: ida }, byteInput: { value: byteSequence } });
+    });
+
+    generateCodeFull();
+}
+
+function generateCodeFull() {
+    const frameworkName = document.getElementById('frameworkName').value || "UnityFramework";
+    let activeCode = `
+h5gg.require(7.9);
+var h5frida = h5gg.loadPlugin("h5frida", "h5frida-16.0.10.dylib");
+if (!h5frida) throw "Không thấy Frida";
+
+function ActiveCodePatch(fpath, vaddr, bytes) {
+    if (!h5frida.ActiveCodePatch(fpath, vaddr, bytes)) {
+        h5frida.ApplyCodePatch(fpath, vaddr, bytes);
+    }
+    return true;
+}
+
+function DeactiveCodePatch(fpath, vaddr, bytes) {
+    return h5frida.DeactiveCodePatch(fpath, vaddr, bytes);
+}
+`;
+
+    for (let { offsetInput, byteInput } of patches) {
+        const offset = offsetInput.value;
+        const byte = byteInput.value;
+        if (offset && byte) {
+            activeCode += `ActiveCodePatch((char*)[NSSENCRYPT("Frameworks/${frameworkName}.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);\n`;
+            activeCode += `DeactiveCodePatch((char*)[NSSENCRYPT("Frameworks/${frameworkName}.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);\n\n`;
+        }
+    }
+
+    document.getElementById('generated-code').textContent = activeCode;
+}
+
 function copyToClipboard() {
     const codeElement = document.getElementById('generated-code');
     navigator.clipboard.writeText(codeElement.textContent).then(() => {
         showTemporaryMessage(event.target, 'Đã sao chép vào clipboard!');
+				
     }).catch(err => {
         console.error('Sao chép văn bản thất bại: ' + err);
     });
@@ -674,6 +807,16 @@ document.addEventListener('DOMContentLoaded', function() {
     processButton.addEventListener('click', () => processTextInputIDA2(idaInputs));
     inputContainer.appendChild(processButton);
 
+    const processSimplifiedButton = document.createElement('button');
+    processSimplifiedButton.innerText = 'Chuyển đổi định dạng đơn giản';
+    processSimplifiedButton.addEventListener('click', () => processTextInputIDA2Simplified(idaInputs));
+    inputContainer.appendChild(processSimplifiedButton);
+
+    const processFullButton = document.createElement('button');
+    processFullButton.innerText = 'Chuyển đổi định dạng đầy đủ';
+    processFullButton.addEventListener('click', () => processTextInputIDA2Full(idaInputs));
+    inputContainer.appendChild(processFullButton);
+
     const resultHeader = document.createElement('h3');
     resultHeader.innerText = 'Kết Quả:';
     newContainer.appendChild(resultHeader);
@@ -696,13 +839,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('generateNonEncryptedButton').addEventListener('click', generateTemplates);
     document.getElementById('generateNearbyButton').addEventListener('click', generateNearbyTemplates);
 
-    
     // Update all code when framework name changes
     frameworkInput.addEventListener('input', function() {
         const sections = document.querySelectorAll('.code-section');
         sections.forEach(section => updateCode(section));
         processTextInput(textInput, outputContainer, this.value, 'fullPath');
         processTextInputIDA2(idaInputs);
+        processTextInputIDA2Simplified(idaInputs);
+        processTextInputIDA2Full(idaInputs);
     });
 });
 </script>
