@@ -36,7 +36,7 @@
             background-size: 100px 100px, cover;
         }
 
-        h1, h2 {
+        h1, h2, h3 {
             color: var(--highlight-color);
             text-align: center;
             padding: 20px 0;
@@ -215,34 +215,40 @@ function showTemporaryMessage(element, message, duration = 2000) {
     }, duration);
 }
 
-function processTextInput(inputElement, container) {
+function processTextInput(inputElement, container, frameworkName, encryptionType) {
     const text = inputElement.value;
     const regex = /Modify detected at: .+ \(IDA: (.+?)\)([\s\S]*?)(?=Modify detected|$)/g;
-    const allMatches = [...text.matchAll(regex)].reverse();
     const modRegex = /Org:\s*0x[\da-fA-F]+,\s*Mod:\s*0x([\da-fA-F]+)/g;
     const uniquePairs = new Map();
 
-    allMatches.forEach(match => {
+    let match;
+    while ((match = regex.exec(text)) !== null) {
         const idaOffset = match[1];
         const modificationsBlock = match[2];
-        let modValue;
         let byteSequence = '';
 
-        while ((modValue = modRegex.exec(modificationsBlock)) !== null) {
-            byteSequence += modValue[1].padStart(2, '0').toUpperCase();
+        let modMatch;
+        while ((modMatch = modRegex.exec(modificationsBlock)) !== null) {
+            byteSequence += modMatch[1].padStart(2, '0').toUpperCase();
         }
 
         if (!uniquePairs.has(idaOffset)) {
             uniquePairs.set(idaOffset, byteSequence);
         }
-    });
+    }
 
     container.innerHTML = '';
     uniquePairs.forEach((byteSequence, ida) => {
         const offsetString = `"${ida}"`;
+        let activeCode, deactiveCode;
 
-        const activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/UnityFramework") UTF8String], ENCRYPTOFFSET(${offsetString}), (char*)[NSSENCRYPT("${byteSequence}") UTF8String]);`;
-        const deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/UnityFramework") UTF8String], ENCRYPTOFFSET(${offsetString}), (char*)[NSSENCRYPT("${byteSequence}") UTF8String]);`;
+        if (encryptionType === 'fullPath') {
+            activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("Frameworks/${frameworkName}.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET(${offsetString}), (char*)[NSSENCRYPT("${byteSequence}") UTF8String]);`;
+            deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("Frameworks/${frameworkName}.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET(${offsetString}), (char*)[NSSENCRYPT("${byteSequence}") UTF8String]);`;
+        } else {
+            activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("${frameworkName}") UTF8String], ENCRYPTOFFSET(${offsetString}), (char*)[NSSENCRYPT("${byteSequence}") UTF8String]);`;
+            deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("${frameworkName}") UTF8String], ENCRYPTOFFSET(${offsetString}), (char*)[NSSENCRYPT("${byteSequence}") UTF8String]);`;
+        }
 
         const activeDiv = createCodeDiv(activeCode);
         const deactiveDiv = createCodeDiv(deactiveCode);
@@ -308,10 +314,6 @@ function addCodeSection() {
         <button class="copy-button">Sao chép Active</button>
         <pre class="code-passages deactive"></pre>
         <button class="copy-button">Sao chép Deactive</button>
-        <pre class="code-passages custom-active"></pre>
-        <button class="copy-button">Sao chép Custom Active</button>
-        <pre class="code-passages custom-deactive"></pre>
-        <button class="copy-button">Sao chép Custom Deactive</button>
     `;
 
     const updateButton = codeSection.querySelector('.update-button');
@@ -330,12 +332,10 @@ function updateCode(section) {
     const byteInput = section.querySelector('.byte-input');
     const activePre = section.querySelector('.code-passages.active');
     const deactivePre = section.querySelector('.code-passages.deactive');
-    
-    const customActivePre = section.querySelector('.code-passages.custom-active');
-    const customDeactivePre = section.querySelector('.code-passages.custom-deactive');
 
-    
-    if (!offsetInput || !byteInput || !activePre || !deactivePre || !customActivePre || !customDeactivePre) {
+    const frameworkName = document.getElementById('frameworkName').value || "UnityFramework";
+
+    if (!offsetInput || !byteInput || !activePre || !deactivePre) {
         console.error("One or more elements not found in the section");
         return;
     }
@@ -343,15 +343,11 @@ function updateCode(section) {
     const offset = offsetInput.value;
     const byte = byteInput.value;
 
-    const activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/UnityFramework") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);`;
-    const deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/UnityFramework") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);`;
-    const customActiveCode = `ActiveCodePatch("Frameworks/UnityFramework.framework/UnityFramework", ${offset}, "${byte}");`;
-    const customDeactiveCode = `DeactiveCodePatch("Frameworks/UnityFramework.framework/UnityFramework", ${offset}, "${byte}");`;
+    const activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("Frameworks/${frameworkName}.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);`;
+    const deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("Frameworks/${frameworkName}.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);`;
 
     activePre.textContent = activeCode;
     deactivePre.textContent = deactiveCode;
-    customActivePre.textContent = customActiveCode;
-    customDeactivePre.textContent = customDeactiveCode;
 }
 
 function copyCode(element) {
@@ -395,8 +391,8 @@ function generateNearbyTemplates() {
         const randomOffset = baseOffset + Math.floor(Math.random() * 201) - 100;
         const randomOffsetHex = '0x' + randomOffset.toString(16).padStart(8, '0');
 
-        const activeCode = `ActiveCodePatch("${frameworkPath}", ${randomOffsetHex}, "${byte}");`;
-        const deactiveCode = `DeactiveCodePatch("${frameworkPath}", ${randomOffsetHex}, "${byte}");`;
+        const activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("${frameworkPath}") UTF8String], ENCRYPTOFFSET("${randomOffsetHex}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);`;
+        const deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("${frameworkPath}") UTF8String], ENCRYPTOFFSET("${randomOffsetHex}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);`;
         allCode += activeCode + '\n' + deactiveCode + '\n\n';
     }
 
@@ -502,7 +498,7 @@ function generateTemplates() {
 }
 
 function processTextInputIDA2(container) {
-    const frameworkPath = "Frameworks/UnityFramework.framework/UnityFramework";
+    const frameworkName = document.getElementById('frameworkName').value || "UnityFramework";
     const textareas = container.getElementsByTagName('textarea');
     const uniquePairs = new Map();
 
@@ -537,7 +533,7 @@ function processTextInputIDA2(container) {
 }
 
 function generateCode() {
-    const frameworkPath = "Frameworks/UnityFramework.framework/UnityFramework";
+    const frameworkName = document.getElementById('frameworkName').value || "UnityFramework";
     let activeCode = `
 h5gg.require(7.9);
 var h5frida = h5gg.loadPlugin("h5frida", "h5frida-16.0.10.dylib");
@@ -559,8 +555,8 @@ function DeactiveCodePatch(fpath, vaddr, bytes) {
         const offset = offsetInput.value;
         const byte = byteInput.value;
         if (offset && byte) {
-            activeCode += `ActiveCodePatch("${frameworkPath}", ${offset}, "${byte}");\n`;
-            activeCode += `DeactiveCodePatch("${frameworkPath}", ${offset}, "${byte}");\n\n`;
+            activeCode += `ActiveCodePatch((char*)[NSSENCRYPT("${frameworkName}") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);\n`;
+            activeCode += `DeactiveCodePatch((char*)[NSSENCRYPT("${frameworkName}") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);\n\n`;
         }
     }
 
@@ -591,6 +587,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const inputSection = document.createElement("div");
     inputSection.className = "input-section";
 
+    const frameworkLabel = document.createElement("label");
+    frameworkLabel.innerText = "Tên Framework:";
+    const frameworkInput = document.createElement("input");
+    frameworkInput.type = "text";
+    frameworkInput.value = "UnityFramework";
+    frameworkInput.id = "frameworkName";
+    inputSection.appendChild(frameworkLabel);
+    inputSection.appendChild(frameworkInput);
+
     const inputLabel = document.createElement("label");
     inputLabel.innerText = "Nhập dữ liệu từ IDA:";
     inputSection.appendChild(inputLabel);
@@ -602,25 +607,34 @@ document.addEventListener('DOMContentLoaded', function() {
     buttonReverse.innerText = "Đảo ngược các khối văn bản";
     buttonReverse.addEventListener('click', () => reverseTextBlocks(textInput));
 
-    const buttonProcess = document.createElement("button");
-    buttonProcess.innerText = "Chuyển đổi và lọc";
-    const outputContainer = document.createElement("div");
+    const buttonConvertEncryptedFullPath = document.createElement("button");
+    buttonConvertEncryptedFullPath.innerText = "Chuyển đổi (Mã hóa đường dẫn đầy đủ)";
+    buttonConvertEncryptedFullPath.addEventListener('click', () => {
+        processTextInput(textInput, outputContainer, frameworkInput.value, 'fullPath');
+    });
 
-    buttonProcess.addEventListener('click', () => processTextInput(textInput, outputContainer));
+    const buttonConvertEncryptedNameOnly = document.createElement("button");
+    buttonConvertEncryptedNameOnly.innerText = "Chuyển đổi (Mã hóa tên framework)";
+    buttonConvertEncryptedNameOnly.addEventListener('click', () => {
+        processTextInput(textInput, outputContainer, frameworkInput.value, 'nameOnly');
+    });
+
+    const outputContainer = document.createElement("div");
 
     const buttonCopyAll = document.createElement("button");
     buttonCopyAll.innerText = "Sao Chép Tất Cả";
     buttonCopyAll.addEventListener('click', () => copyAllContents(outputContainer));
 
     inputSection.appendChild(buttonReverse);
-    inputSection.appendChild(buttonProcess);
+    inputSection.appendChild(buttonConvertEncryptedFullPath);
+    inputSection.appendChild(buttonConvertEncryptedNameOnly);
     inputSection.appendChild(outputContainer);
     inputSection.appendChild(buttonCopyAll);
     container.appendChild(inputSection);
-    
+
     addCodeSection(); // Thêm phần code ban đầu
 
-    // New section starts here
+    // New section for IDA 2 starts here
     const newContainer = document.createElement('div');
     newContainer.id = 'container';
     container.appendChild(newContainer);
@@ -681,6 +695,15 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('generateEncryptedButton').addEventListener('click', generateEncryptedTemplates);
     document.getElementById('generateNonEncryptedButton').addEventListener('click', generateTemplates);
     document.getElementById('generateNearbyButton').addEventListener('click', generateNearbyTemplates);
+
+    
+    // Update all code when framework name changes
+    frameworkInput.addEventListener('input', function() {
+        const sections = document.querySelectorAll('.code-section');
+        sections.forEach(section => updateCode(section));
+        processTextInput(textInput, outputContainer, this.value, 'fullPath');
+        processTextInputIDA2(idaInputs);
+    });
 });
 </script>
 
