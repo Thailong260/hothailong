@@ -374,7 +374,7 @@ function generateNearbyTemplates() {
     outputDiv.innerHTML = '';
 
     const regex = /ActiveCodePatch\("([^"]+)",\s*(0x[0-9a-fA-F]+),\s*"([0-9A-F]+)"\)/;
-    const match = sampleActivePatchInput.match(regex);
+		ActivePatchInput.match(regex);
 
     if (!match) {
         alert('Định dạng mẫu ActiveCodePatch không hợp lệ.');
@@ -390,8 +390,8 @@ function generateNearbyTemplates() {
         const randomOffset = baseOffset + Math.floor(Math.random() * 201) - 100;
         const randomOffsetHex = '0x' + randomOffset.toString(16).padStart(8, '0');
 
-        const activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("${frameworkPath}") UTF8String], ENCRYPTOFFSET("${randomOffsetHex}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);`;
-        const deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("${frameworkPath}") UTF8String], ENCRYPTOFFSET("${randomOffsetHex}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);`;
+        const activeCode = `ActiveCodePatch("${frameworkPath}", ${randomOffsetHex}, "${byte}");`;
+        const deactiveCode = `DeactiveCodePatch("${frameworkPath}", ${randomOffsetHex}, "${byte}");`;
         allCode += activeCode + '\n' + deactiveCode + '\n\n';
     }
 
@@ -566,8 +566,8 @@ function DeactiveCodePatch(fpath, vaddr, bytes) {
         const offset = offsetInput.value;
         const byte = byteInput.value;
         if (offset && byte) {
-            activeCode += `ActiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);\n`;
-            activeCode += `DeactiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);\n\n`;
+            activeCode += `ActiveCodePatch("Frameworks/UnityFramework.framework/${frameworkName}", "${offset}", "${byte}");\n`;
+            activeCode += `DeactiveCodePatch("Frameworks/UnityFramework.framework/${frameworkName}", "${offset}", "${byte}");\n\n`;
         }
     }
 
@@ -680,15 +680,15 @@ document.addEventListener('DOMContentLoaded', function() {
     reverseButton.addEventListener('click', reverseAllTextareas);
     inputContainer.appendChild(reverseButton);
     
-    const processButton = document.createElement('button');
-    processButton.innerText = 'Chuyển đổi và lọc';
-    processButton.addEventListener('click', () => processTextInputIDA2(idaInputs));
-    inputContainer.appendChild(processButton);
-
     const randomizeNameButton = document.createElement('button');
     randomizeNameButton.innerText = 'Random tên Framework';
     randomizeNameButton.addEventListener('click', randomizeFrameworkName);
     inputContainer.appendChild(randomizeNameButton);
+
+    const processButton = document.createElement('button');
+    processButton.innerText = 'Chuyển đổi và lọc';
+    processButton.addEventListener('click', () => processTextInputIDA2(idaInputs));
+    inputContainer.appendChild(processButton);
 
     const resultHeader = document.createElement('h3');
     resultHeader.innerText = 'Kết Quả:';
@@ -708,8 +708,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add event listeners for the main buttons
     document.getElementById('addSectionButton').addEventListener('click', addCodeSection);
     document.getElementById('copyAllButton').addEventListener('click', () => copyAllContents(container));
-    document.getElementById('generateEncryptedButton').addEventListener('click', generateEncryptedTemplates);
-    
     document.getElementById('generateEncryptedButton').addEventListener('click', generateEncryptedTemplates);
     document.getElementById('generateNonEncryptedButton').addEventListener('click', generateTemplates);
     document.getElementById('generateNearbyButton').addEventListener('click', generateNearbyTemplates);
