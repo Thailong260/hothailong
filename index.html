@@ -24,8 +24,7 @@
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--primary-bg);
+            font-family: 'Poppins: var(--primary-bg);
             color: var(--text-color);
             line-height: 1.6;
             padding: 20px;
@@ -43,7 +42,7 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
-        #codeContainer, #container, #templateGenerator {
+        #codeContainer, #container {
             max-width: 800px;
             margin: 30px auto;
             padding: 20px;
@@ -68,7 +67,7 @@
             font-weight: 600;
         }
 
-        input[type="text"], input[type="number"], textarea {
+        input[type="text"], textarea {
             width: 100%;
             padding: 10px;
             margin-bottom: 10px;
@@ -137,18 +136,6 @@
             background-color: #45a049;
         }
 
-        #templateCount {
-            width: 100px;
-            margin-right: 10px;
-        }
-
-        #templateOutput {
-            margin-top: 20px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        /* Responsive design */
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -162,7 +149,7 @@
                 font-size: 20px;
             }
 
-            #codeContainer, #container, #templateGenerator {
+            #codeContainer, #container {
                 padding: 15px;
             }
 
@@ -190,21 +177,8 @@
 <body>
     <h1>🎄 GHOST - DVC IPA Christmas Edition 🎅</h1>
     <div id="codeContainer"></div>
-    <button id="addSectionButton">Thêm Offset Khác 🎁</button>
-    <button id="copyAllButton">Sao Chép Tất Cả 📋</button>
     
-    <div id="templateGenerator" class="input-section">
-        <h2>🎄 Tạo Nhiều Biểu Mẫu 🎄</h2>
-        <input type="number" id="templateCount" value="200" min="1" max="1000">
-        <input type="text" id="sampleActivePatch" placeholder="Ví dụ: ActiveCodePatch(&quot;Frameworks/UnityFramework.framework/UnityFramework&quot;, 0xdd639e32, &quot;3BABE621&quot;)">
-        <button id="generateEncryptedButton">Tạo Biểu Mẫu Mã Hóa 🔒</button>
-        <button id="generateNonEncryptedButton">Tạo Biểu Mẫu Không Mã Hóa 🔓</button>
-        <button id="generateNearbyButton">Tạo Biểu Mẫu Gần offset Và Byte 🎯</button>
-        <div id="templateOutput"></div>
-    </div>
-
 <script>
-let sectionCount = 0;
 let patches = [];
 
 function showTemporaryMessage(element, message, duration = 2000) {
@@ -300,207 +274,17 @@ function copyAllContents(container) {
     });
 }
 
-function addCodeSection() {
-    sectionCount++;
-    const container = document.getElementById("codeContainer");
-    const codeSection = document.createElement("div");
-    codeSection.className = "code-section";
-    codeSection.innerHTML = `
-        <h2>Section ${sectionCount}</h2>
-        <label>Nhập offset: <input type="text" placeholder="e.g., 0x1000178dc" class="offset-input"></label>
-        <label>Nhập byte: <input type="text" placeholder="e.g., C0035FD6" class="byte-input"></label>
-        <button class="update-button">Xác nhận</button>
-        <pre class="code-passages active"></pre>
-        <button class="copy-button">Sao chép Active</button>
-        <pre class="code-passages deactive"></pre>
-        <button class="copy-button">Sao chép Deactive</button>
-    `;
-
-    const updateButton = codeSection.querySelector('.update-button');
-    updateButton.addEventListener('click', () => updateCode(codeSection));
-
-    const copyButtons = codeSection.querySelectorAll('.copy-button');
-    copyButtons.forEach(button => {
-        button.addEventListener('click', () => copyCode(button.previousElementSibling));
-    });
-
-    container.appendChild(codeSection);
-}
-
-function updateCode(section) {
-    const offsetInput = section.querySelector('.offset-input');
-    const byteInput = section.querySelector('.byte-input');
-    const activePre = section.querySelector('.code-passages.active');
-    const deactivePre = section.querySelector('.code-passages.deactive');
-
-    const frameworkName = document.getElementById('frameworkName').value || "UnityFramework";
-
-    if (!offsetInput || !byteInput || !activePre || !deactivePre) {
-        console.error("One or more elements not found in the section");
-        return;
-    }
-
-    const offset = offsetInput.value;
-    const byte = byteInput.value;
-
-    const activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);`;
-    const deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);`;
-
-    activePre.textContent = activeCode;
-    deactivePre.textContent = deactiveCode;
-}
-
-function copyCode(element) {
-    if (!element) {
-        console.error("Element to copy from not found");
-        return;
-    }
-
-    navigator.clipboard.writeText(element.textContent).then(() => {
-        showTemporaryMessage(element.nextElementSibling, "Đã sao chép!");
-    }).catch(err => {
-        console.error("Error copying text: ", err);
-    });
-}
-
-function generateRandomHex(length) {
-    return [...Array(length)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
-}
-
-function generateNearbyTemplates() {
-    const count = document.getElementById('templateCount').value;
-    const sampleActivePatchInput = document.getElementById('sampleActivePatch').value;
-    const outputDiv = document.getElementById('templateOutput');
-    outputDiv.innerHTML = '';
-
-    const regex = /ActiveCodePatch\("([^"]+)",\s*(0x[0-9a-fA-F]+),\s*"([0-9A-F]+)"\)/;
-		ActivePatchInput.match(regex);
-
-    if (!match) {
-        alert('Định dạng mẫu ActiveCodePatch không hợp lệ.');
-        return;
-    }
-
-    const [, frameworkPath, offsetHex, byte] = match;
-    let baseOffset = parseInt(offsetHex, 16);
-
-    let allCode = '';
-
-    for (let i = 0; i < count; i++) {
-        const randomOffset = baseOffset + Math.floor(Math.random() * 201) - 100;
-        const randomOffsetHex = '0x' + randomOffset.toString(16).padStart(8, '0');
-
-        const activeCode = `ActiveCodePatch("${frameworkPath}", ${randomOffsetHex}, "${byte}");`;
-        const deactiveCode = `DeactiveCodePatch("${frameworkPath}", ${randomOffsetHex}, "${byte}");`;
-        allCode += activeCode + '\n' + deactiveCode + '\n\n';
-    }
-
-    const codeElement = document.createElement('pre');
-    codeElement.className = 'code-passages';
-    codeElement.textContent = allCode;
-    outputDiv.appendChild(codeElement);
-
-    const copyButton = document.createElement('button');
-    copyButton.textContent = 'Sao chép tất cả';
-    copyButton.addEventListener('click', function() {
-        navigator.clipboard.writeText(allCode).then(() => {
-            showTemporaryMessage(this, 'Đã sao chép tất cả!');
-        });
-    });
-    outputDiv.appendChild(copyButton);
-}
-
-function generateEncryptedTemplates() {
-    const count = document.getElementById('templateCount').value;
-    const sampleActivePatchInput = document.getElementById('sampleActivePatch').value;
-    const outputDiv = document.getElementById('templateOutput');
-    outputDiv.innerHTML = '';
-
-    const regex = /ActiveCodePatch\("([^"]+)",\s*(0x[0-9a-fA-F]+),\s*"([0-9A-F]+)"\)/;
-    const match = sampleActivePatchInput.match(regex);
-
-    if (!match) {
-        alert('Định dạng mẫu ActiveCodePatch không hợp lệ.');
-        return;
-    }
-
-    const [, frameworkPath, , byte] = match;
-
-    let allCode = '';
-
-    for (let i = 0; i < count; i++) {
-        const randomOffset = '0x' + generateRandomHex(8);
-        const randomByte = generateRandomHex(byte.length).toUpperCase();
-
-        const activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("${frameworkPath}") UTF8String], ENCRYPTOFFSET("${randomOffset}"), (char*)[NSSENCRYPT("${randomByte}") UTF8String]);`;
-        const deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("${frameworkPath}") UTF8String], ENCRYPTOFFSET("${randomOffset}"), (char*)[NSSENCRYPT("${randomByte}") UTF8String]);`;
-
-        allCode += activeCode + '\n' + deactiveCode + '\n\n';
-    }
-
-    const codeElement = document.createElement('pre');
-    codeElement.className = 'code-passages';
-    codeElement.textContent = allCode;
-    outputDiv.appendChild(codeElement);
-
-    const copyButton = document.createElement('button');
-    copyButton.textContent = 'Sao chép tất cả';
-    copyButton.addEventListener('click', function() {
-        navigator.clipboard.writeText(allCode).then(() => {
-            showTemporaryMessage(this, 'Đã sao chép tất cả!');
-        });
-    });
-    outputDiv.appendChild(copyButton);
-}
-
-function generateTemplates() {
-    const count = document.getElementById('templateCount').value;
-    const sampleActivePatchInput = document.getElementById('sampleActivePatch').value;
-    const outputDiv = document.getElementById('templateOutput');
-    outputDiv.innerHTML = '';
-
-    const regex = /ActiveCodePatch\("([^"]+)",\s*(0x[0-9a-fA-F]+),\s*"([0-9A-F]+)"\)/;
-    const match = sampleActivePatchInput.match(regex);
-
-    if (!match) {
-        alert('Định dạng mẫu ActiveCodePatch không hợp lệ.');
-        return;
-    }
-
-    const [, frameworkPath, , byte] = match;
-
-    let allCode = '';
-
-    for (let i = 0; i < count; i++) {
-        const randomOffset = '0x' + generateRandomHex(8);
-        const randomByte = generateRandomHex(byte.length).toUpperCase();
-
-        const activeCode = `ActiveCodePatch("${frameworkPath}", ${randomOffset}, "${randomByte}");`;
-        const deactiveCode = `DeactiveCodePatch("${frameworkPath}", ${randomOffset}, "${randomByte}");`;
-
-        allCode += activeCode + '\n' + deactiveCode + '\n\n';
-    }
-
-    const codeElement = document.createElement('pre');
-    codeElement.className = 'code-passages';
-    codeElement.textContent = allCode;
-    outputDiv.appendChild(codeElement);
-
-    const copyButton = document.createElement('button');
-    copyButton.textContent = 'Sao chép tất cả';
-    copyButton.addEventListener('click', function() {
-        navigator.clipboard.writeText(allCode).then(() => {
-            showTemporaryMessage(this, 'Đã sao chép tất cả!');
-        });
-    });
-    outputDiv.appendChild(copyButton);
-}
-
 function generateRandomFrameworkName() {
-    const suffixes = ["Framework", "Core", "Engine", "Module", "System", "Library"];
+    const prefixes = ["Core", "Engine", "System", "Module", "Library", "Platform", "Framework", "Kit", "Suite", "Toolset"];
+    const middleParts = ["Game", "App", "Dev", "Render", "Logic", "Network", "AI", "Physics", "Audio", "Graphics"];
+    const suffixes = ["Pro", "X", "Plus", "Advanced", "Ultimate", "Extreme", "Elite", "Prime", "Master", "Ultra"];
+
+    const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const randomMiddle = middleParts[Math.floor(Math.random() * middleParts.length)];
     const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
-    return "Unity" + randomSuffix;
-}
+
+    return `${randomPrefix}${randomMiddle}${randomSuffix}`;
+	}
 
 function randomizeFrameworkName() {
     const frameworkInput = document.getElementById('frameworkName');
@@ -619,15 +403,10 @@ document.addEventListener('DOMContentLoaded', function() {
     buttonReverse.addEventListener('click', () => reverseTextBlocks(textInput));
 
     const buttonConvertEncryptedFullPath = document.createElement("button");
+    
     buttonConvertEncryptedFullPath.innerText = "Chuyển đổi (Mã hóa đường dẫn đầy đủ)";
     buttonConvertEncryptedFullPath.addEventListener('click', () => {
         processTextInput(textInput, outputContainer, frameworkInput.value, 'fullPath');
-    });
-
-    const buttonConvertEncryptedNameOnly = document.createElement("button");
-    buttonConvertEncryptedNameOnly.innerText = "Chuyển đổi (Mã hóa tên framework)";
-    buttonConvertEncryptedNameOnly.addEventListener('click', () => {
-        processTextInput(textInput, outputContainer, frameworkInput.value, 'nameOnly');
     });
 
     const outputContainer = document.createElement("div");
@@ -638,12 +417,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     inputSection.appendChild(buttonReverse);
     inputSection.appendChild(buttonConvertEncryptedFullPath);
-    inputSection.appendChild(buttonConvertEncryptedNameOnly);
     inputSection.appendChild(outputContainer);
     inputSection.appendChild(buttonCopyAll);
     container.appendChild(inputSection);
-
-    addCodeSection(); // Thêm phần code ban đầu
 
     // New section for IDA 2 starts here
     const newContainer = document.createElement('div');
@@ -704,13 +480,6 @@ document.addEventListener('DOMContentLoaded', function() {
     copyToClipboardButton.innerText = 'Sao chép vào clipboard';
     copyToClipboardButton.addEventListener('click', copyToClipboard);
     newContainer.appendChild(copyToClipboardButton);
-
-    // Add event listeners for the main buttons
-    document.getElementById('addSectionButton').addEventListener('click', addCodeSection);
-    document.getElementById('copyAllButton').addEventListener('click', () => copyAllContents(container));
-    document.getElementById('generateEncryptedButton').addEventListener('click', generateEncryptedTemplates);
-    document.getElementById('generateNonEncryptedButton').addEventListener('click', generateTemplates);
-    document.getElementById('generateNearbyButton').addEventListener('click', generateNearbyTemplates);
 
     // Update all code when framework name changes
     frameworkInput.addEventListener('input', function() {
