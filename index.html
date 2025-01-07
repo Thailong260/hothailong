@@ -298,8 +298,8 @@ function processTextInputIDA2(container) {
     const textareas = container.getElementsByTagName('textarea');
     const uniquePairs = new Map();
 
-    for (let i = 0; i < textareas.length; i++) {
-        const text = textareas[i].value;
+    Array.from(textareas).forEach(textarea => {
+        const text = textarea.value;
         const regex = /Modify detected at: .+ \(IDA: (.+?)\)([\s\S]*?)(?=Modify detected|$)/g;
         const modRegex = /Org:\s*0x[\da-fA-F]+,\s*Mod:\s*0x([\da-fA-F]+)/g;
 
@@ -318,12 +318,12 @@ function processTextInputIDA2(container) {
                 uniquePairs.set(idaOffset, byteSequence);
             }
         }
-    }
-
-    patches = [];
-    uniquePairs.forEach((byteSequence, ida) => {
-        patches.push({ offsetInput: { value: ida }, byteInput: { value: byteSequence } });
     });
+
+    patches = Array.from(uniquePairs).map(([ida, byteSequence]) => ({
+        offsetInput: { value: ida },
+        byteInput: { value: byteSequence }
+    }));
 
     generateCodeFull();
 }
@@ -392,8 +392,8 @@ document.addEventListener('DOMContentLoaded', function() {
     inputSection.appendChild(frameworkLabel);
     inputSection.appendChild(frameworkInput);
 
-    
     const inputLabel = document.createElement("label");
+    
     inputLabel.innerText = "Nhập dữ liệu từ IDA:";
     inputSection.appendChild(inputLabel);
 
