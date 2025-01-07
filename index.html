@@ -24,7 +24,8 @@
         }
 
         body {
-            font-family: 'Poppins: var(--primary-bg);
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--primary-bg);
             color: var(--text-color);
             line-height: 1.6;
             padding: 20px;
@@ -284,7 +285,7 @@ function generateRandomFrameworkName() {
     const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
 
     return `${randomPrefix}${randomMiddle}${randomSuffix}`;
-	}
+}
 
 function randomizeFrameworkName() {
     const frameworkInput = document.getElementById('frameworkName');
@@ -391,6 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
     inputSection.appendChild(frameworkLabel);
     inputSection.appendChild(frameworkInput);
 
+    
     const inputLabel = document.createElement("label");
     inputLabel.innerText = "Nhập dữ liệu từ IDA:";
     inputSection.appendChild(inputLabel);
