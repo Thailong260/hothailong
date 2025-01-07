@@ -36,7 +36,7 @@
             background-size: 100px 100px, cover;
         }
 
-        h1, h2, h3 {
+        h1, h2, h3, h4 {
             color: var(--highlight-color);
             text-align: center;
             padding: 20px 0;
@@ -180,8 +180,6 @@
     <div id="codeContainer"></div>
     
 <script>
-let patches = [];
-
 function showTemporaryMessage(element, message, duration = 2000) {
     const originalText = element.innerText;
     element.innerText = message;
@@ -190,47 +188,59 @@ function showTemporaryMessage(element, message, duration = 2000) {
     }, duration);
 }
 
-function processTextInput(inputElement, container, frameworkName, encryptionType) {
-    const text = inputElement.value;
-    const regex = /Modify detected at: .+ \(IDA: (.+?)\)([\s\S]*?)(?=Modify detected|$)/g;
-    const modRegex = /Org:\s*0x[\da-fA-F]+,\s*Mod:\s*0x([\da-fA-F]+)/g;
-    const uniquePairs = new Map();
+function processTextInput(container, frameworkName, encryptionType) {
+    const textareas = container.querySelectorAll('textarea');
+    const outputContainer = document.getElementById('outputContainer');
+    outputContainer.innerHTML = '';
 
-    let match;
-    while ((match = regex.exec(text)) !== null) {
-        const idaOffset = match[1];
-        const modificationsBlock = match[2];
-        let byteSequence = '';
+    textareas.forEach((textarea, index) => {
+        const text = textarea.value;
+        const regex = /Modify detected at: .+ \(IDA: (.+?)\)([\s\S]*?)(?=Modify detected|$)/g;
+        const modRegex = /Org:\s*0x[\da-fA-F]+,\s*Mod:\s*0x([\da-fA-F]+)/g;
+        const uniquePairs = new Map();
 
-        let modMatch;
-        while ((modMatch = modRegex.exec(modificationsBlock)) !== null) {
-            byteSequence += modMatch[1].padStart(2, '0').toUpperCase();
+        let match;
+        while ((match = regex.exec(text)) !== null) {
+            const idaOffset = match[1];
+            const modificationsBlock = match[2];
+            let byteSequence = '';
+
+            let modMatch;
+            while ((modMatch = modRegex.exec(modificationsBlock)) !== null) {
+                byteSequence += modMatch[1].padStart(2, '0').toUpperCase();
+            }
+
+            if (!uniquePairs.has(idaOffset)) {
+                uniquePairs.set(idaOffset, byteSequence);
+            }
         }
 
-        if (!uniquePairs.has(idaOffset)) {
-            uniquePairs.set(idaOffset, byteSequence);
-        }
-    }
+        const resultDiv = document.createElement('div');
+        resultDiv.innerHTML = `<h4>Kết quả từ ô nhập liệu #${index + 1}</h4>`;
+        outputContainer.appendChild(resultDiv);
 
-    container.innerHTML = '';
-    uniquePairs.forEach((byteSequence, ida) => {
-        const offsetString = `"${ida}"`;
-        let activeCode, deactiveCode;
+        uniquePairs.forEach((byteSequence, ida) => {
+            const offsetString = `"${ida}"`;
+            let activeCode, deactiveCode;
 
-        if (encryptionType === 'fullPath') {
-            activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET(${offsetString}), (char*)[NSSENCRYPT("${byteSequence}") UTF8String]);`;
-            deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET(${offsetString}), (char*)[NSSENCRYPT("${byteSequence}") UTF8String]);`;
-        } else {
-            activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("${frameworkName}") UTF8String], ENCRYPTOFFSET(${offsetString}), (char*)[NSSENCRYPT("${byteSequence}") UTF8String]);`;
-            deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("${frameworkName}") UTF8String], ENCRYPTOFFSET(${offsetString}), (char*)[NSSENCRYPT("${byteSequence}") UTF8String]);`;
-        }
+            if (encryptionType === 'fullPath') {
+                activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET(${offsetString}), (char*)[NSSENCRYPT("${byteSequence}") UTF8String]);`;
+                deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET(${offsetString}), (char*)[NSSENCRYPT("${byteSequence}") UTF8String]);`;
+            } else {
+                activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("${frameworkName}") UTF8String], ENCRYPTOFFSET(${offsetString}), (char*)[NSSENCRYPT("${byteSequence}") UTF8String]);`;
+                deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("${frameworkName}") UTF8String], ENCRYPTOFFSET(${offsetString}), (char*)[NSSENCRYPT("${byteSequence}") UTF8String]);`;
+            }
 
-        const activeDiv = createCodeDiv(activeCode);
-        const deactiveDiv = createCodeDiv(deactiveCode);
+            const activeDiv = createCodeDiv(activeCode);
+            const deactiveDiv = createCodeDiv(deactiveCode);
 
-        container.appendChild(activeDiv);
-        container.appendChild(deactiveDiv);
+            resultDiv.appendChild(activeDiv);
+            resultDiv.appendChild(deactiveDiv);
+        });
     });
+
+    // Xử lý IDA2 đồng thời
+    processTextInputIDA2(document.getElementById('ida2-inputs'));
 }
 
 function createCodeDiv(code) {
@@ -257,10 +267,13 @@ function createCodeDiv(code) {
     return codeDiv;
 }
 
-function reverseTextBlocks(inputElement) {
-    const text = inputElement.value;
-    const blocks = text.split(/(?=Modify detected)/).reverse();
-    inputElement.value = blocks.join('');
+function reverseAllTextareas() {
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+        const text = textarea.value;
+        const blocks = text.split(/(?=Modify detected)/).reverse();
+        textarea.value = blocks.join('');
+    });
 }
 
 function copyAllContents(container) {
@@ -290,10 +303,8 @@ function generateRandomFrameworkName() {
 function randomizeFrameworkName() {
     const frameworkInput = document.getElementById('frameworkName');
     frameworkInput.value = generateRandomFrameworkName();
-    generateCodeFull();
+    processTextInput(document.getElementById('ida-inputs'), frameworkInput.value, 'fullPath');
 }
-
-
 
 function processTextInputIDA2(container) {
     const frameworkName = document.getElementById('frameworkName').value || "UnityFramework";
@@ -363,8 +374,6 @@ function DeactiveCodePatch(fpath, vaddr, bytes) {
     document.getElementById('generated-code').textContent = fullCode;
 }
 
-
-
 function copyToClipboard() {
     const codeElement = document.getElementById('generated-code');
     navigator.clipboard.writeText(codeElement.textContent).then(() => {
@@ -374,50 +383,75 @@ function copyToClipboard() {
     });
 }
 
-function reverseAllTextareas() {
-    const textareas = document.querySelectorAll('#ida-inputs textarea');
-    textareas.forEach(textarea => {
-        const text = textarea.value;
-        const blocks = text.split(/(?=Modify detected)/).reverse();
-        textarea.value = blocks.join('');
-    });
-}
-
 document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById("codeContainer");
 
     const inputSection = document.createElement("div");
     inputSection.className = "input-section";
-
+		
     const frameworkLabel = document.createElement("label");
     frameworkLabel.innerText = "Tên Framework:";
     const frameworkInput = document.createElement("input");
     frameworkInput.type = "text";
     frameworkInput.value = "UnityFramework";
     frameworkInput.id = "frameworkName";
+
+    const randomizeNameButton = document.createElement('button');
+    randomizeNameButton.innerText = 'Random tên Framework';
+    randomizeNameButton.addEventListener('click', randomizeFrameworkName);
+
     inputSection.appendChild(frameworkLabel);
     inputSection.appendChild(frameworkInput);
+    inputSection.appendChild(randomizeNameButton);
 
     const inputLabel = document.createElement("label");
-    
     inputLabel.innerText = "Nhập dữ liệu từ IDA:";
     inputSection.appendChild(inputLabel);
 
+    const idaInputs = document.createElement('div');
+    idaInputs.id = 'ida-inputs';
+    inputSection.appendChild(idaInputs);
+
     const textInput = document.createElement("textarea");
-    inputSection.appendChild(textInput);
+    idaInputs.appendChild(textInput);
+
+    // Thêm sự kiện để sao chép dữ liệu từ IDA1 sang IDA2
+    textInput.addEventListener('input', function() {
+        const ida2Textarea = document.querySelector('#ida2-inputs textarea');
+        if (ida2Textarea) {
+            ida2Textarea.value = this.value;
+        }
+    });
+
+    const addTextareaButton = document.createElement('button');
+    addTextareaButton.innerText = 'Thêm ô nhập dữ liệu';
+    addTextareaButton.addEventListener('click', () => {
+        const newTextarea = document.createElement('textarea');
+        idaInputs.appendChild(newTextarea);
+        // Thêm sự kiện cho textarea mới
+        newTextarea.addEventListener('input', function() {
+            const ida2Textareas = document.querySelectorAll('#ida2-inputs textarea');
+            if (ida2Textareas.length <= idaInputs.children.length) {
+                const newIda2Textarea = document.createElement('textarea');
+                document.getElementById('ida2-inputs').appendChild(newIda2Textarea);
+            }
+            ida2Textareas[ida2Textareas.length - 1].value = this.value;
+        });
+    });
+    inputSection.appendChild(addTextareaButton);
 
     const buttonReverse = document.createElement("button");
     buttonReverse.innerText = "Đảo ngược các khối văn bản";
-    buttonReverse.addEventListener('click', () => reverseTextBlocks(textInput));
+    buttonReverse.addEventListener('click', reverseAllTextareas);
 
     const buttonConvertEncryptedFullPath = document.createElement("button");
-    
     buttonConvertEncryptedFullPath.innerText = "Chuyển đổi (Mã hóa đường dẫn đầy đủ)";
     buttonConvertEncryptedFullPath.addEventListener('click', () => {
-        processTextInput(textInput, outputContainer, frameworkInput.value, 'fullPath');
+        processTextInput(idaInputs, frameworkInput.value, 'fullPath');
     });
 
     const outputContainer = document.createElement("div");
+    outputContainer.id = "outputContainer";
 
     const buttonCopyAll = document.createElement("button");
     buttonCopyAll.innerText = "Sao Chép Tất Cả";
@@ -443,35 +477,35 @@ document.addEventListener('DOMContentLoaded', function() {
     label.innerText = 'Nhập dữ liệu từ IDA 2:';
     inputContainer.appendChild(label);
     
-    const idaInputs = document.createElement('div');
-    idaInputs.id = 'ida-inputs';
-    inputContainer.appendChild(idaInputs);
+    const ida2Inputs = document.createElement('div');
+    ida2Inputs.id = 'ida2-inputs';
+    inputContainer.appendChild(ida2Inputs);
     
     const textarea = document.createElement('textarea');
-    idaInputs.appendChild(textarea);
+    ida2Inputs.appendChild(textarea);
     
-    const addTextareaButton = document.createElement('button');
-    addTextareaButton.innerText = 'Thêm ô nhập dữ liệu';
-    
-    addTextareaButton.addEventListener('click', () => {
+    const addTextarea2Button = document.createElement('button');
+    addTextarea2Button.innerText = 'Thêm ô nhập dữ liệu';
+    addTextarea2Button.addEventListener('click', () => {
         const newTextarea = document.createElement('textarea');
-        idaInputs.appendChild(newTextarea);
+        ida2Inputs.appendChild(newTextarea);
     });
-    inputContainer.appendChild(addTextareaButton);
+    inputContainer.appendChild(addTextarea2Button);
     
     const reverseButton = document.createElement('button');
     reverseButton.innerText = 'Đảo ngược tất cả văn bản';
-    reverseButton.addEventListener('click', reverseAllTextareas);
-    inputContainer.appendChild(reverseButton);
+    reverseButton.addEventListener('click', () => {
+        const textareas = ida2Inputs.querySelectorAll('textarea');
+        textareas.forEach(textarea => {
+            const text = textarea.value;
+            const blocks = text.split(/(?=Modify detected)/).reverse();
+            textarea.value = blocks.join('');
+        });
+    });
     
-    const randomizeNameButton = document.createElement('button');
-    randomizeNameButton.innerText = 'Random tên Framework';
-    randomizeNameButton.addEventListener('click', randomizeFrameworkName);
-    inputContainer.appendChild(randomizeNameButton);
-
     const processButton = document.createElement('button');
     processButton.innerText = 'Chuyển đổi và lọc';
-    processButton.addEventListener('click', () => processTextInputIDA2(idaInputs));
+    processButton.addEventListener('click', () => processTextInputIDA2(ida2Inputs));
     inputContainer.appendChild(processButton);
 
     const resultHeader = document.createElement('h3');
@@ -491,7 +525,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update all code when framework name changes
     frameworkInput.addEventListener('input', function() {
-        generateCodeFull();
+        processTextInput(idaInputs, this.value, 'fullPath');
+        processTextInputIDA2(ida2Inputs);
     });
 });
 </script>
