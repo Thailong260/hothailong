@@ -293,16 +293,19 @@ function randomizeFrameworkName() {
     generateCodeFull();
 }
 
+
+
 function processTextInputIDA2(container) {
     const frameworkName = document.getElementById('frameworkName').value || "UnityFramework";
     const textareas = container.getElementsByTagName('textarea');
-    const uniquePairs = new Map();
+    let allPatches = [];
 
-    Array.from(textareas).forEach(textarea => {
+    Array.from(textareas).forEach((textarea, index) => {
         const text = textarea.value;
         const regex = /Modify detected at: .+ \(IDA: (.+?)\)([\s\S]*?)(?=Modify detected|$)/g;
         const modRegex = /Org:\s*0x[\da-fA-F]+,\s*Mod:\s*0x([\da-fA-F]+)/g;
 
+        let patches = [];
         let match;
         while ((match = regex.exec(text)) !== null) {
             const idaOffset = match[1];
@@ -314,23 +317,21 @@ function processTextInputIDA2(container) {
                 byteSequence += modMatch[1].padStart(2, '0').toUpperCase();
             }
 
-            if (!uniquePairs.has(idaOffset)) {
-                uniquePairs.set(idaOffset, byteSequence);
+            if (byteSequence) {
+                patches.push({ offsetInput: { value: idaOffset }, byteInput: { value: byteSequence } });
             }
+        }
+
+        if (patches.length > 0) {
+            allPatches.push({ index, patches });
         }
     });
 
-    patches = Array.from(uniquePairs).map(([ida, byteSequence]) => ({
-        offsetInput: { value: ida },
-        byteInput: { value: byteSequence }
-    }));
-
-    generateCodeFull();
+    generateCodeFull(allPatches, frameworkName);
 }
 
-function generateCodeFull() {
-    const frameworkName = document.getElementById('frameworkName').value || "UnityFramework";
-    let activeCode = `
+function generateCodeFull(allPatches, frameworkName) {
+    let fullCode = `
 h5gg.require(7.9);
 var h5frida = h5gg.loadPlugin("h5frida", "h5frida-16.0.10.dylib");
 if (!h5frida) throw "Không thấy Frida";
@@ -347,17 +348,22 @@ function DeactiveCodePatch(fpath, vaddr, bytes) {
 }
 `;
 
-    for (let { offsetInput, byteInput } of patches) {
-        const offset = offsetInput.value;
-        const byte = byteInput.value;
-        if (offset && byte) {
-            activeCode += `ActiveCodePatch("Frameworks/UnityFramework.framework/${frameworkName}", "${offset}", "${byte}");\n`;
-            activeCode += `DeactiveCodePatch("Frameworks/UnityFramework.framework/${frameworkName}", "${offset}", "${byte}");\n\n`;
-        }
-    }
+    allPatches.forEach(({ index, patches }) => {
+        fullCode += `\n// Kết quả từ ô nhập liệu #${index + 1}\n`;
+        patches.forEach(({ offsetInput, byteInput }) => {
+            const offset = offsetInput.value;
+            const byte = byteInput.value;
+            if (offset && byte) {
+                fullCode += `ActiveCodePatch("Frameworks/UnityFramework.framework/${frameworkName}", "${offset}", "${byte}");\n`;
+                fullCode += `DeactiveCodePatch("Frameworks/UnityFramework.framework/${frameworkName}", "${offset}", "${byte}");\n\n`;
+            }
+        });
+    });
 
-    document.getElementById('generated-code').textContent = activeCode;
+    document.getElementById('generated-code').textContent = fullCode;
 }
+
+
 
 function copyToClipboard() {
     const codeElement = document.getElementById('generated-code');
