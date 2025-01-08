@@ -313,6 +313,8 @@ function processTextInputIDA2(container) {
 
     Array.from(textareas).forEach((textarea, index) => {
         const text = textarea.value;
+        if (text.trim() === '') return; // Bỏ qua các ô trống
+
         const regex = /Modify detected at: .+ \(IDA: (.+?)\)([\s\S]*?)(?=Modify detected|$)/g;
         const modRegex = /Org:\s*0x[\da-fA-F]+,\s*Mod:\s*0x([\da-fA-F]+)/g;
 
@@ -384,11 +386,11 @@ function copyToClipboard() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    const container = document.getElementById("codeContainer");
+const container = document.getElementById("codeContainer");
 
     const inputSection = document.createElement("div");
     inputSection.className = "input-section";
-		
+
     const frameworkLabel = document.createElement("label");
     frameworkLabel.innerText = "Tên Framework:";
     const frameworkInput = document.createElement("input");
@@ -417,10 +419,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Thêm sự kiện để sao chép dữ liệu từ IDA1 sang IDA2
     textInput.addEventListener('input', function() {
-        const ida2Textarea = document.querySelector('#ida2-inputs textarea');
-        if (ida2Textarea) {
-            ida2Textarea.value = this.value;
+        const ida2Textareas = document.querySelectorAll('#ida2-inputs textarea');
+        if (ida2Textareas.length > 0) {
+            ida2Textareas[0].value = this.value;
         }
+        processTextInputIDA2(document.getElementById('ida2-inputs'));
     });
 
     const addTextareaButton = document.createElement('button');
@@ -428,14 +431,19 @@ document.addEventListener('DOMContentLoaded', function() {
     addTextareaButton.addEventListener('click', () => {
         const newTextarea = document.createElement('textarea');
         idaInputs.appendChild(newTextarea);
+        
+        // Thêm ô tương ứng trong IDA2
+        const newIda2Textarea = document.createElement('textarea');
+        document.getElementById('ida2-inputs').appendChild(newIda2Textarea);
+        
         // Thêm sự kiện cho textarea mới
         newTextarea.addEventListener('input', function() {
             const ida2Textareas = document.querySelectorAll('#ida2-inputs textarea');
-            if (ida2Textareas.length <= idaInputs.children.length) {
-                const newIda2Textarea = document.createElement('textarea');
-                document.getElementById('ida2-inputs').appendChild(newIda2Textarea);
+            const index = Array.from(idaInputs.children).indexOf(this);
+            if (ida2Textareas[index]) {
+                ida2Textareas[index].value = this.value;
             }
-            ida2Textareas[ida2Textareas.length - 1].value = this.value;
+            processTextInputIDA2(document.getElementById('ida2-inputs'));
         });
     });
     inputSection.appendChild(addTextareaButton);
@@ -489,6 +497,13 @@ document.addEventListener('DOMContentLoaded', function() {
     addTextarea2Button.addEventListener('click', () => {
         const newTextarea = document.createElement('textarea');
         ida2Inputs.appendChild(newTextarea);
+        
+        // Thêm ô tương ứng trong IDA1
+        const newIda1Textarea = document.createElement('textarea');
+        document.getElementById('ida-inputs').appendChild(newIda1Textarea);
+
+        // Thêm sự kiện input cho textarea mới của IDA2
+        newTextarea.addEventListener('input', () => processTextInputIDA2(ida2Inputs));
     });
     inputContainer.appendChild(addTextarea2Button);
     
@@ -501,7 +516,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const blocks = text.split(/(?=Modify detected)/).reverse();
             textarea.value = blocks.join('');
         });
+        processTextInputIDA2(ida2Inputs);
     });
+    inputContainer.appendChild(reverseButton);
     
     const processButton = document.createElement('button');
     processButton.innerText = 'Chuyển đổi và lọc';
@@ -528,6 +545,9 @@ document.addEventListener('DOMContentLoaded', function() {
         processTextInput(idaInputs, this.value, 'fullPath');
         processTextInputIDA2(ida2Inputs);
     });
+
+    // Thêm sự kiện input cho textarea đầu tiên của IDA2
+    textarea.addEventListener('input', () => processTextInputIDA2(ida2Inputs));
 });
 </script>
 
