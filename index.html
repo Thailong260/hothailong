@@ -137,6 +137,35 @@
             background-color: #45a049;
         }
 
+        .manual-offset-field {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .manual-offset-field input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .manual-offset-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .manual-offset-buttons button {
+            flex: 1;
+            margin: 0 5px;
+        }
+
+        #ida-inputs textarea, #ida2-inputs textarea {
+            width: 100%;
+            min-height: 100px;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -341,11 +370,29 @@ function processTextInputIDA2(container) {
     });
 
     generateCodeFull(allPatches, frameworkName);
+
+    // Thêm phần này để hiển thị kết quả trong outputContainer
+    const outputContainer = document.getElementById('outputContainer');
+    
+    allPatches.forEach(({ index, patches }) => {
+        const resultDiv = document.createElement('div');
+        resultDiv.innerHTML = `<h4>Kết quả từ IDA 2 - ô nhập liệu #${index + 1}</h4>`;
+        
+        patches.forEach(({ offsetInput, byteInput }) => {
+            const activeCode = `ActiveCodePatch("Frameworks/UnityFramework.framework/${frameworkName}", "${offsetInput.value}", "${byteInput.value}");`;
+            const deactiveCode = `DeactiveCodePatch("Frameworks/UnityFramework.framework/${frameworkName}", "${offsetInput.value}", "${byteInput.value}");`;
+            
+            resultDiv.appendChild(createCodeDiv(activeCode));
+            resultDiv.appendChild(createCodeDiv(deactiveCode));
+        });
+
+        outputContainer.appendChild(resultDiv);
+    });
 }
 
 function generateCodeFull(allPatches, frameworkName) {
     let fullCode = `
-h5gg.require(7.9);
+		h5gg.require(7.9);
 var h5frida = h5gg.loadPlugin("h5frida", "h5frida-16.0.10.dylib");
 if (!h5frida) throw "Không thấy Frida";
 
@@ -362,7 +409,7 @@ function DeactiveCodePatch(fpath, vaddr, bytes) {
 `;
 
     allPatches.forEach(({ index, patches }) => {
-        fullCode += `\n// Kết quả từ ô nhập liệu #${index + 1}\n`;
+        fullCode += `\n// Kết quả từ ${index === 'Manual' ? 'nhập liệu thủ công' : 'ô nhập liệu #' + (index + 1)}\n`;
         patches.forEach(({ offsetInput, byteInput }) => {
             const offset = offsetInput.value;
             const byte = byteInput.value;
@@ -385,8 +432,76 @@ function copyToClipboard() {
     });
 }
 
+function addManualOffsetInput() {
+    const manualInputContainer = document.createElement('div');
+    manualInputContainer.className = 'input-section';
+    manualInputContainer.innerHTML = `
+        <h3>Nhập Offset Thủ Công</h3>
+        <div id="manual-offset-inputs"></div>
+        <div class="manual-offset-buttons">
+            <button onclick="addManualOffsetField()">Thêm ô nhập offset</button>
+            <button onclick="processAllManualOffsets()">Xử lý tất cả offset</button>
+        </div>
+    `;
+    document.getElementById('codeContainer').insertBefore(manualInputContainer, document.getElementById('container'));
+    addManualOffsetField(); // Thêm ô nhập đầu tiên
+}
+
+function addManualOffsetField() {
+    const container = document.getElementById('manual-offset-inputs');
+    const fieldSet = document.createElement('div');
+    fieldSet.className = 'manual-offset-field';
+    fieldSet.innerHTML = `
+        <input type="text" class="manualOffset" placeholder="Nhập offset">
+        <input type="text" class="manualBytes" placeholder="Nhập bytes">
+    `;
+    container.appendChild(fieldSet);
+}
+
+function processAllManualOffsets() {
+    const fields = document.querySelectorAll('.manual-offset-field');
+    const frameworkName = document.getElementById('frameworkName').value || "UnityFramework";
+    let allPatches = [];
+
+    fields.forEach((field, index) => {
+        const offset = field.querySelector('.manualOffset').value;
+        const bytes = field.querySelector('.manualBytes').value;
+        if (offset && bytes) {
+            allPatches.push({
+                index: `Manual ${index + 1}`,
+                patches: [{ offsetInput: { value: offset }, byteInput: { value: bytes } }]
+            });
+        }
+    });
+
+    if (allPatches.length > 0) {
+        generateCodeFull(allPatches, frameworkName);
+
+        // Hiển thị kết quả trong outputContainer
+        const outputContainer = document.getElementById('outputContainer');
+        outputContainer.innerHTML = ''; // Xóa nội dung cũ
+
+        allPatches.forEach(({ index, patches }) => {
+            const resultDiv = document.createElement('div');
+            resultDiv.innerHTML = `<h4>Kết quả từ nhập liệu thủ công #${index}</h4>`;
+            
+            patches.forEach(({ offsetInput, byteInput }) => {
+                const activeCode = `ActiveCodePatch("Frameworks/UnityFramework.framework/${frameworkName}", "${offsetInput.value}", "${byteInput.value}");`;
+                const deactiveCode = `DeactiveCodePatch("Frameworks/UnityFramework.framework/${frameworkName}", "${offsetInput.value}", "${byteInput.value}");`;
+                
+                resultDiv.appendChild(createCodeDiv(activeCode));
+                resultDiv.appendChild(createCodeDiv(deactiveCode));
+            });
+
+            outputContainer.appendChild(resultDiv);
+        });
+    } else {
+        alert('Vui lòng nhập ít nhất một cặp offset và bytes hợp lệ.');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-const container = document.getElementById("codeContainer");
+    const container = document.getElementById("codeContainer");
 
     const inputSection = document.createElement("div");
     inputSection.className = "input-section";
@@ -548,6 +663,12 @@ const container = document.getElementById("codeContainer");
 
     // Thêm sự kiện input cho textarea đầu tiên của IDA2
     textarea.addEventListener('input', () => processTextInputIDA2(ida2Inputs));
+
+    // Thêm phần nhập offset thủ công
+    addManualOffsetInput();
+
+    // Xử lý dữ liệu IDA 2 khi trang web được tải
+    processTextInputIDA2(ida2Inputs);
 });
 </script>
 
