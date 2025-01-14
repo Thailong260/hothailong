@@ -379,9 +379,8 @@ function processTextInputIDA2(container) {
         resultDiv.innerHTML = `<h4>Kết quả từ IDA 2 - ô nhập liệu #${index + 1}</h4>`;
         
         patches.forEach(({ offsetInput, byteInput }) => {
-            const activeCode = `ActiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET("${offsetInput.value}"), (char*)[NSSENCRYPT("${byteInput.value}") UTF8String]);`;
-            const deactiveCode = `DeactiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET("${offsetInput.value}"), (char*)[NSSENCRYPT("${byteInput.value}") UTF8String]);`;
-            
+            const activeCode = `ActiveCodePatch("Frameworks/UnityFramework.framework/${frameworkName}", "${offsetInput.value}", "${byteInput.value}");`;
+            const deactiveCode = `DeactiveCodePatch("Frameworks/UnityFramework.framework/${frameworkName}", "${offsetInput.value}", "${byteInput.value}");`;
             
             resultDiv.appendChild(createCodeDiv(activeCode));
             resultDiv.appendChild(createCodeDiv(deactiveCode));
@@ -415,8 +414,15 @@ function DeactiveCodePatch(fpath, vaddr, bytes) {
             const offset = offsetInput.value;
             const byte = byteInput.value;
             if (offset && byte) {
-                fullCode += `ActiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);\n`;
-                fullCode += `DeactiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);\n\n`;
+                if (index === 'Manual' || typeof index === 'string' && index.startsWith('Manual')) {
+                    // Mã hóa cho nhập liệu thủ công
+                    fullCode += `ActiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);\n`;
+                    fullCode += `DeactiveCodePatch((char*)[NSSENCRYPT("Frameworks/UnityFramework.framework/${frameworkName}") UTF8String], ENCRYPTOFFSET("${offset}"), (char*)[NSSENCRYPT("${byte}") UTF8String]);\n\n`;
+                } else {
+                    // Không mã hóa cho IDA 2
+                    fullCode += `ActiveCodePatch("Frameworks/UnityFramework.framework/${frameworkName}", "${offset}", "${byte}");\n`;
+                    fullCode += `DeactiveCodePatch("Frameworks/UnityFramework.framework/${frameworkName}", "${offset}", "${byte}");\n\n`;
+                }
             }
         });
     });
